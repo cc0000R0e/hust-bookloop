@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资料详情 · HUST BookLoop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/detail.css">
+</head>
+<body>
+  <header>
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="index.html">
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <path d="M3 6h12l3 2 3-2h12v25H21l-3 2-3-2H3z" fill="#f4eeeb"/>
+          <path d="M3 6v25h12l3 2 3-2h12V6M18 8v25" stroke="currentColor" stroke-width="2"/>
+          <path d="M7 5h8l3 3 3-3h8v22h-8l-3 3-3-3H7z" stroke="#c5bdb7"/>
+        </svg>
+        HUST BookLoop
+      </a>
+      <div class="navlinks">
+        <a href="index.html">教材市场</a>
+        <button type="button" data-notice="about">关于平台</button>
+        <button type="button" class="publish" data-notice="publish">＋ 发布资料</button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="search-band" aria-label="搜索资料">
+    <div class="search-inner">
+      <form class="search" action="index.html" method="get">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/>
+        </svg>
+        <label class="sr-only" for="search-input">搜索书名、作者、课程或标签</label>
+        <input id="search-input" name="q" type="search" placeholder="搜索书名、作者、课程或标签…">
+        <button type="submit">搜索</button>
+      </form>
+      <button class="profile" type="button" data-notice="account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="7" r="4"/><path d="M3 22v-3c0-7 18-7 18 0v3z"/>
+        </svg>
+        <span>登录 / 注册</span>
+      </button>
+    </div>
+  </section>
+
+  <main class="detail-layout">
+    <nav class="breadcrumb" aria-label="当前位置">
+      <a href="index.html">教材市场</a><span aria-hidden="true">／</span>
+      <span id="crumb" aria-current="page">资料详情</span>
+      <a class="back-link" href="index.html">← 返回市场</a>
+    </nav>
+
+    <div id="detail-content" hidden>
+      <section class="product" aria-labelledby="book-title">
+        <div class="gallery">
+          <button type="button" class="large-cover" id="zoom-cover" aria-label="放大查看封面示意图">
+            <span class="condition" id="condition"></span>
+            <span id="cover-art"></span>
+            <span class="zoom-hint">＋ 点击放大</span>
+          </button>
+          <p class="image-caption">封面示意图 · 正式发布时展示实物照片</p>
+        </div>
+
+        <div class="product-summary">
+          <div class="eyebrow"><span id="category"></span><span class="status" id="status"></span></div>
+          <h1 id="book-title"></h1>
+          <p class="byline" id="author"></p>
+          <div class="price-panel">
+            <span class="price-label" id="price-label"></span>
+            <strong class="detail-price" id="price"></strong>
+            <span class="price-caption" id="price-caption"></span>
+          </div>
+          <dl class="summary-facts">
+            <div><dt>版次 / 版本</dt><dd id="version"></dd></div>
+            <div><dt>使用情况</dt><dd id="wear"></dd></div>
+            <div><dt>关联课程</dt><dd id="course"></dd></div>
+            <div><dt>考试 / 用途</dt><dd id="tags"></dd></div>
+          </dl>
+          <div class="scope-block">
+            <h2>适用范围</h2>
+            <div id="scopes" class="scope-list"></div>
+            <p>由发布者填写，请结合自己的课程要求确认。</p>
+          </div>
+          <div class="contact-actions">
+            <button type="button" class="primary" id="contact">登录后联系发布者</button>
+            <button type="button" class="report-button" data-notice="report">举报资料</button>
+          </div>
+          <p class="contact-note">登录后可查看联系方式，付款与交接由双方自行协商。</p>
+        </div>
+      </section>
+
+      <div class="lower-layout">
+        <section class="description-panel" aria-labelledby="description-heading">
+          <h2 id="description-heading">资料说明</h2>
+          <p id="description"></p>
+          <dl class="extra-facts">
+            <div><dt>出版社</dt><dd>未提供</dd></div>
+            <div><dt>发布编号</dt><dd id="listing-number"></dd></div>
+          </dl>
+          <div class="handoff">
+            <h3>如何获取这份资料</h3>
+            <ol>
+              <li><span>01</span><div>确认资料<p>核对版本、适用范围及使用情况。</p></div></li>
+              <li><span>02</span><div>联系发布者<p>登录后查看联系方式，沟通具体细节。</p></div></li>
+              <li><span>03</span><div>约定交接<p id="handoff-copy">双方自行约定付款与交接方式。</p></div></li>
+            </ol>
+          </div>
+        </section>
+        <aside class="seller-panel" aria-labelledby="seller-heading">
+          <h2 id="seller-heading">发布者</h2>
+          <div class="seller-profile"><div class="avatar" aria-hidden="true">书</div><div><strong>校园读者</strong><p>演示账号 · 未进行身份认证</p></div></div>
+          <dl class="seller-facts">
+            <div><dt>发布时间</dt><dd>2026-10-26（演示）</dd></div>
+            <div><dt>联系方式</dt><dd>登录后可查看</dd></div>
+          </dl>
+          <p class="seller-note">一本读过的书，也可以成为另一段学习的开始。</p>
+        </aside>
+      </div>
+      <p class="demo-disclosure">原型演示：书籍信息、封面和发布者均为演示数据，不对应真实交易。登录、联系和举报尚未接入后端。</p>
+    </div>
+
+    <section class="missing" id="missing" hidden>
+      <h1>没有找到这份资料</h1>
+      <p>链接中的资料编号无效，请返回市场选择其他资料。</p>
+      <a class="primary" href="index.html">返回教材市场</a>
+    </section>
+    <noscript><p>请启用JavaScript以查看演示资料详情。<a href="index.html">返回市场</a></p></noscript>
+  </main>
+
+  <footer>HUST BookLoop · 华中科技大学计算机科学与技术学院二手教材与学习资料流转平台<br>校园书籍，循环阅读。</footer>
+
+  <dialog id="modal" aria-labelledby="modal-title">
+    <div class="dialog-head"><h2 id="modal-title"></h2><button type="button" class="close" id="close" aria-label="关闭">×</button></div>
+    <div id="modal-body"></div>
+  </dialog>
+  <script src="js/books.js"></script>
+  <script src="js/detail.js"></script>
+</body>
+</html>

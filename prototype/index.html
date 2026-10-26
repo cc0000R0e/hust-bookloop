@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HUST BookLoop · 教材市场</title>
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+  <header><nav class="nav" aria-label="主导航">
+    <a class="brand" href="index.html"><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M3 6h12l3 2 3-2h12v25H21l-3 2-3-2H3z" fill="#f4eeeb"/><path d="M3 6v25h12l3 2 3-2h12V6M18 8v25" stroke="currentColor" stroke-width="2"/><path d="M7 5h8l3 3 3-3h8v22h-8l-3 3-3-3H7z" stroke="#c5bdb7"/></svg>HUST BookLoop</a>
+    <div class="navlinks"><a class="active" href="#market" aria-current="page">教材市场</a><button type="button" data-info="about">关于平台</button><button class="publish" type="button" data-info="publish">＋ 发布资料</button></div>
+  </nav></header>
+  <section class="search-band" aria-label="搜索资料"><div class="search-inner">
+    <form class="search" id="search-form"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><label class="sr-only" for="keyword">搜索书名、作者、课程或标签</label><input id="keyword" type="search" placeholder="搜索书名、作者、课程或标签…" autocomplete="off"><button type="submit">搜索</button></form>
+    <button class="profile" type="button" data-info="account" aria-label="账户与登录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M3 22v-3c0-7 18-7 18 0v3z"/></svg><span>登录 / 注册</span></button>
+  </div></section>
+  <main class="workspace" id="market">
+    <div class="page-heading"><h1>教材市场</h1><span class="subtitle">让读过的书，继续下一段旅程。</span></div>
+    <section class="filters" aria-label="筛选资料">
+      <label><span class="sr-only">专业</span><select id="major"><option value="">全部专业</option><option>不限专业</option><option>计算机科学与技术</option><option>物联网工程</option></select></label>
+      <label><span class="sr-only">学期</span><select id="semester"><option value="">不限学期</option></select></label>
+      <label><span class="sr-only">类别</span><select id="category"><option value="">全部类别</option><option>教材</option><option>推荐阅读书籍</option><option>考试复习资料</option></select></label>
+      <label><span class="sr-only">考试标签</span><select id="tag"><option value="">全部标签</option> <option>英语四级</option><option>英语六级</option><option>雅思</option><option>托福</option><option>考研</option></select></label>
+      <div class="filter-group" role="group" aria-label="流转方式"><button type="button" data-mode="all" aria-pressed="true">全部</button><button type="button" data-mode="sale" aria-pressed="false">出售</button><button type="button" data-mode="free" aria-pressed="false">免费赠送</button></div>
+      <button type="button" class="reset" id="reset">重置筛选</button>
+    </section>
+    <div class="results-bar"><span id="count" role="status" aria-live="polite"></span><label class="sort">排序<select id="sort"><option value="new">最新发布</option><option value="low">价格从低到高</option><option value="high">价格从高到低</option></select></label></div>
+    <section class="grid" id="grid" aria-label="资料列表"></section>
+    <div class="bottom"><span>资料适用信息由发布者提供，请结合课程要求确认。<br>本页书籍、封面及发布信息均为原型演示数据。</span><span class="page-number" aria-label="当前第1页">1</span></div>
+  </main>
+  <footer>HUST BookLoop · 华中科技大学计算机科学与技术学院二手教材与学习资料流转平台<br>校园书籍，循环阅读。</footer>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="dialog-head"><h2 id="modal-title"></h2><button type="button" class="close" id="close" aria-label="关闭">×</button></div><div id="modal-body"></div></dialog>
+  <script src="js/books.js"></script>
+  <script src="js/market.js"></script>
+</body>
+</html>
