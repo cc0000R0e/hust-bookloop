@@ -7,7 +7,7 @@
     function reset(){$('keyword').value='';['major','semester','category','tag'].forEach(id=>$(id).value='');$('sort').value='new';setMode('all');}
     function setMode(value){mode=value;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));render()}
     function show(title,html){$('modal-title').textContent=title;$('modal-body').innerHTML=html;$('modal').showModal()}
-    const info={about:['关于 HUST BookLoop','让闲置教材与学习资料找到下一位读者。平台支持出售与免费赠送，你可以按专业、学期和考试标签寻找需要的资料。'],publish:['发布资料','当前完成的是教材市场首页原型。发布页面将在下一步制作，包含出售／免费赠送、图片、专业学期（支持不限专业）和可选课程标签。'],account:['登录 / 注册','当前为本地交互原型，尚未接入账户服务。正式版本需要登录才能发布资料或查看联系方式。']};
+    const info={about:['关于 HUST BookLoop','让闲置教材与学习资料找到下一位读者。平台支持出售与免费赠送，你可以按专业、学期和考试标签寻找需要的资料。'],account:['登录 / 注册','当前为本地交互原型，尚未接入账户服务。正式版本需要登录才能发布资料或查看联系方式。']};
     document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>{const i=info[b.dataset.info];show(i[0],`<p>${i[1]}</p><p class="prototype-note">本页不会提交或保存个人信息。</p>`)});
     document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
     ['major','semester','category','tag','sort'].forEach(id=>$(id).addEventListener('change',render));$('keyword').addEventListener('input',render);$('search-form').onsubmit=e=>{e.preventDefault();render()};$('reset').onclick=reset;

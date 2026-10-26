@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>发布资料 · HUST BookLoop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/publish.css">
+</head>
+<body>
+  <header>
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="index.html"><span class="brand-book" aria-hidden="true">▤</span> HUST BookLoop</a>
+      <div class="navlinks"><a href="index.html">教材市场</a><a class="publish" href="publish.html" aria-current="page">＋ 发布资料</a></div>
+    </nav>
+  </header>
+  <div class="page-band"><div><a href="index.html">教材市场</a><span>／</span><span id="breadcrumb">发布资料</span></div></div>
+  <main class="publish-layout">
+    <div class="page-title"><div><p class="eyebrow">PASS A BOOK FORWARD</p><h1 id="page-title">让闲置的书，遇见下一位读者。</h1><p id="intro">填写资料信息，选择出售或免费赠送。</p></div><a href="publish.html?edit=1" id="mode-link">体验编辑模式 →</a></div>
+    <div class="prototype-banner" id="prototype-banner">本地表单原型 · 提交仅展示预览，不上传图片、不保存联系方式，也不会发布到市场。</div>
+    <section id="not-found" hidden><h2>没有找到要编辑的资料</h2><p>请检查资料编号，或创建新的演示资料。</p><a href="publish.html">前往发布页面 →</a></section>
+    <div class="form-layout" id="form-layout">
+      <form id="listing-form">
+        <section class="form-section">
+          <h2><span>01</span> 基本信息</h2>
+          <div class="field"><label for="title">资料名称 <em>*</em></label><input id="title" name="title" required maxlength="100" placeholder="例如：数据结构（C语言版）"></div>
+          <div class="field"><label for="category">资料类别 <em>*</em></label><select id="category" required><option value="">请选择类别</option><option>教材</option><option>推荐阅读书籍</option><option>考试复习资料</option></select></div>
+          <div class="two-columns">
+            <div class="field"><label for="author">作者 <small>选填</small></label><input id="author" maxlength="100" placeholder="作者或编者"></div>
+            <div class="field"><label for="publisher">出版社 <small>选填</small></label><input id="publisher" maxlength="100" placeholder="出版社名称"></div>
+          </div>
+          <div class="field"><label for="version">版本说明 <small>选填</small></label><input id="version" maxlength="100" placeholder="例如：第3版、2026年复习笔记"></div>
+        </section>
+
+        <section class="form-section">
+          <h2><span>02</span> 图片与使用情况</h2>
+          <label class="field-label" for="photos">实物照片 <em>*</em></label>
+          <div class="upload-box"><span class="upload-symbol" aria-hidden="true">＋</span><strong>选择书籍封面、内页或使用痕迹照片</strong><p>1—6张，每张不超过5MB · JPG / PNG / WebP</p><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="image-help"></div>
+          <p id="image-help" class="hint">第一张作为封面，可移除图片或将其他图片设为封面。图片只在当前页面预览。</p>
+          <p id="image-error" class="error" role="alert"></p>
+          <div id="image-previews" class="image-previews" aria-label="已选图片"></div>
+          <div class="two-columns">
+            <div class="field"><label for="condition">资料成色 <em>*</em></label><select id="condition" required><option value="">请选择成色</option><option>近全新</option><option>轻微使用</option><option>明显使用</option></select></div>
+            <div class="field"><label for="note">笔记情况 <em>*</em></label><select id="note" required><option value="">请选择笔记情况</option><option>无笔记</option><option>少量笔记</option><option>大量笔记</option></select></div>
+          </div>
+          <div class="field"><label for="description">资料说明 <em>*</em></label><textarea id="description" required maxlength="2000" rows="5" placeholder="描述内容、缺损、笔记情况；成套资料请说明包含哪些内容。"></textarea><span class="counter" id="description-count">0 / 2000</span></div>
+        </section>
+
+        <section class="form-section">
+          <h2><span>03</span> 适用范围</h2>
+          <p class="section-note">专业与学期成对选择。通用资料可以选择“不限专业＋未定义”。</p>
+          <div id="scope-rows"></div>
+          <button type="button" class="text-button" id="add-scope">＋ 添加一组适用范围</button>
+          <p id="scope-error" class="error" role="alert"></p>
+          <div class="field"><label for="course">课程或考试名称 <small>选填</small></label><input id="course" maxlength="100" placeholder="可留空，例如：数据结构"></div>
+          <fieldset class="tag-field"><legend>考试 / 用途标签 <small>选填，可多选</small></legend><div class="tag-options" id="tag-options"></div></fieldset>
+        </section>
+
+        <section class="form-section">
+          <h2><span>04</span> 流转与联系</h2>
+          <fieldset class="mode-field"><legend>流转方式 <em>*</em></legend><div class="mode-options"><label><input type="radio" name="mode" value="sale" checked><span><strong>出售</strong><small>为闲置资料设置价格</small></span></label><label><input type="radio" name="mode" value="free"><span><strong>免费赠送</strong><small>让知识继续流动</small></span></label></div></fieldset>
+          <div class="field price-field"><label for="price">转让价格 <em id="price-required">*</em></label><div class="price-input"><span>¥</span><input id="price" type="number" min="0.01" max="9999.99" step="0.01" required placeholder="0.00"></div><p class="hint" id="price-help">大于0，最多两位小数。</p></div>
+          <div class="two-columns contact-fields"><div class="field"><label for="contact-type">联系方式 <em>*</em></label><select id="contact-type"><option>微信</option><option>QQ</option><option>手机号</option></select></div><div class="field"><label for="contact-value">联系账号 <em>*</em></label><input id="contact-value" required maxlength="100" autocomplete="off" placeholder="演示时请填写虚拟账号"></div></div>
+          <p class="hint">正式版本仅向登录用户展示联系方式；本原型不会保存或发送该内容。</p>
+        </section>
+
+        <div class="form-actions"><a href="index.html">取消并返回市场</a><button class="primary" type="submit" id="submit-button">预览发布效果 →</button></div>
+      </form>
+      <aside class="form-sidebar">
+        <div class="guide"><span class="guide-icon" aria-hidden="true">↗</span><h2>好资料，值得被看见。</h2><p>几条清楚的信息，可以省去很多次来回询问。</p><ol><li><strong>拍清楚实物</strong><p>封面、版本页和笔记情况都可以拍下来。</p></li><li><strong>如实说明成色</strong><p>缺页、划线或其他使用痕迹，请写在说明中。</p></li><li><strong>选好适用范围</strong><p>不确定课程可以留空，通用书籍可选不限专业。</p></li></ol></div>
+        <div class="live-summary"><h3>本次流转</h3><strong id="summary-mode">出售</strong><p id="summary-price">填写价格后显示</p><span id="summary-status">发布后状态：在售</span></div>
+      </aside>
+    </div>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。<br>本页为发布／编辑交互原型，尚未接入账户、上传或数据库服务。</footer>
+  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-head"><h2 id="preview-title">发布效果预览</h2><button type="button" class="close" id="close-preview" aria-label="关闭预览">×</button></div><div id="preview-content"></div><p class="prototype-note">此预览不代表发布成功。没有数据被发送或保存，关闭或刷新页面后本次输入会丢失。</p><button type="button" class="primary" id="continue-edit">返回继续编辑</button></dialog>
+  <script src="js/books.js"></script>
+  <script src="js/publish.js"></script>
+</body>
+</html>

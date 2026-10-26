@@ -660,3 +660,8 @@ h1 {
 }
 
 }
+
+/* Keep the publication link visible on small screens. */
+@media (max-width: 650px) {
+  .navlinks a.publish { display: block; }
+}
