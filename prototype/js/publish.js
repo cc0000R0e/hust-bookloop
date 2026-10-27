@@ -2,8 +2,8 @@
 const $ = id => document.getElementById(id);
 const form = $('listing-form');
 const semesterOptions = ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '大四上', '大四下', '大五上', '大五下', '研究生', '未定义'];
-const majorOptions = ['不限专业', '计算机科学与技术', '物联网工程'];
-const tagOptions = ['英语四级', '英语六级', '雅思', '托福', '考研'];
+const majorOptions = ['不限专业', ...Demo.state.majors.filter(option => option.enabled).map(option => option.name)];
+const tagOptions = Demo.state.tags.filter(option => option.enabled).map(option => option.name);
 const images = [];
 const editId = new URLSearchParams(location.search).get('edit');
 const editing = editId !== null;
@@ -27,7 +27,7 @@ function addScope(major = '', semester = '') {
     select.required = true;
     select.dataset.field = name === '专业' ? 'major' : 'semester';
     select.add(new Option(`请选择${name}`, ''));
-    options.forEach(option => select.add(new Option(option, option)));
+    [...new Set([...options, ...(value ? [value] : [])])].forEach(option => select.add(new Option(option, option)));
     select.value = value;
     label.append(select);
     row.append(label);
@@ -64,11 +64,16 @@ function freeMode() {
   return form.querySelector('[name="mode"]:checked').value === 'free';
 }
 
+function previewStatus() {
+  if (original && ['已预订', '已下架'].includes(Demo.listing(original.id).status)) return Demo.listing(original.id).status;
+  return freeMode() ? '待赠送' : '在售';
+}
+
 function refreshSummary() {
   $('summary-mode').textContent = freeMode() ? '免费赠送' : '出售';
   $('summary-price').textContent = freeMode() ? '无需支付书籍价款' :
     ($('price').value && Number($('price').value) > 0 ? `¥ ${Number($('price').value).toFixed(2)}` : '填写价格后显示');
-  $('summary-status').textContent = `预览状态：${freeMode() ? '待赠送' : '在售'}`;
+  $('summary-status').textContent = `预览状态：${previewStatus()}`;
 }
 
 function changeMode() {
@@ -157,7 +162,7 @@ $('photos').addEventListener('change', async event => {
   }
 });
 
-tagOptions.forEach(tag => {
+[...new Set([...tagOptions, ...(original ? original.tags : [])])].forEach(tag => {
   const label = document.createElement('label');
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
@@ -198,7 +203,7 @@ form.addEventListener('submit', event => {
   cover.className = 'preview-cover';
   preview.append(cover, createElement('h3', $('title').value));
   const lines = [
-    `${$('category').value} · ${freeMode() ? '免费赠送 · 待赠送' : `¥ ${Number($('price').value).toFixed(2)} · 在售`}`,
+    `${$('category').value} · ${freeMode() ? '免费赠送' : `¥ ${Number($('price').value).toFixed(2)}`} · ${previewStatus()}`,
     `成色：${$('condition').value} · ${$('note').value}`,
     `作者：${$('author').value || '未填写'} · 出版社：${$('publisher').value || '未填写'}`,
     `版本：${$('version').value || '未填写'}`,
@@ -218,7 +223,12 @@ form.addEventListener('submit', event => {
   $(id).addEventListener('click', () => $('preview-dialog').close());
 });
 
-if (editing && !original) {
+if (editing && original && (Demo.listing(original.id).blocked || Demo.listing(original.id).completed)) {
+  $('not-found').hidden = false;
+  $('not-found').querySelector('h2').textContent = '当前资料不可编辑';
+  $('not-found').querySelector('p').textContent = '已完成或被管理员限制的资料不可修改，请返回我的发布查看状态。';
+  $('form-layout').hidden = true;
+} else if (editing && !original) {
   $('not-found').hidden = false;
   $('form-layout').hidden = true;
   $('page-title').textContent = '资料未找到';
@@ -251,3 +261,9 @@ if (editing && !original) {
   addScope();
 }
 refreshSummary();
+
+// Reserved records can edit content but cannot change transfer mode.
+if (original && Demo.listing(original.id).status === '已预订') {
+  form.querySelectorAll('[name="mode"]').forEach(input => input.disabled = true);
+  $('price-help').textContent += ' 当前已预订，流转方式不可修改。';
+}

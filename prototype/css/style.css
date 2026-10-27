@@ -664,4 +664,8 @@ h1 {
 /* Keep the publication link visible on small screens. */
 @media (max-width: 650px) {
   .navlinks a.publish { display: block; }
+  .nav { flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
+  .navlinks { flex-wrap: wrap; gap: 16px; }
+  .navlinks a[href="my-listings.html"],
+  .navlinks a[href="profile.html"] { display: block; font-size: 12px; padding: 5px 0; }
 }

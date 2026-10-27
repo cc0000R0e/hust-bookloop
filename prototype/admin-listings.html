@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资料管理 · HUST BookLoop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body data-page="admin-listings">
+  <header><nav class="nav" aria-label="主导航"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">▤</span> HUST BookLoop</a><div class="navlinks"><a href="index.html">教材市场</a><a class="publish" href="publish.html">＋ 发布资料</a></div></nav></header>
+  <div class="subnav"><nav aria-label="管理中心"><a href="admin-listings.html">资料管理</a><a href="admin-reports.html">举报处理</a><a href="admin-options.html">专业与标签</a><a class="admin-link" href="my-listings.html">返回个人中心 →</a></nav></div>
+  <main class="account-layout">
+    <div class="page-intro"><div><p class="eyebrow">PLATFORM MANAGEMENT</p><h1>资料管理</h1><p>维护清晰、可信的流转信息。</p></div><button type="button" id="reset-demo" class="plain">重置演示数据</button></div>
+    <div class="demo-banner">本地原型 · 管理员操作仅用于演示，无真实管理权限。状态和举报保存在当前标签页会话中；账号密码与联系方式不保存。<span id="storage-warning"></span></div>
+    <div id="session-strip" class="session-strip"></div>
+    <div class="toolbar"><label class="grow"><span class="sr-only">搜索资料</span><input id="admin-search" type="search" placeholder="搜索资料名称"></label><label>状态<select id="admin-state"><option value="">全部状态</option><option>在售</option><option>待赠送</option><option>已预订</option><option>已售出</option><option>已送出</option><option>已下架</option></select></label></div><div id="admin-list"></div>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。<br>原型中的权限与校验仅演示交互，正式版本由Java后端实施。</footer>
+  <dialog id="action-dialog" aria-labelledby="action-title"><form id="action-form"><div class="dialog-head"><h2 id="action-title">确认操作</h2><button class="close" type="button" id="cancel-action" aria-label="关闭">×</button></div><p id="action-description"></p><label id="reason-label">操作说明<textarea id="action-reason" maxlength="500" rows="3"></textarea></label><div class="dialog-buttons"><button class="plain" type="button" id="back-action">取消</button><button class="primary" type="submit">确认</button></div></form></dialog>
+  <script src="js/books.js"></script>
+  <script src="js/demo-state.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>

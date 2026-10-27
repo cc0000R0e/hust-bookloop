@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 · HUST BookLoop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body data-page="login">
+  <header><nav class="nav" aria-label="主导航"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">▤</span> HUST BookLoop</a><div class="navlinks"><a href="index.html">教材市场</a><a class="publish" href="publish.html">＋ 发布资料</a></div></nav></header>
+  <div class="subnav"><nav aria-label="个人中心"><a href="my-listings.html">我的发布</a><a href="profile.html">个人资料</a><a href="login.html">登录 / 注册</a><a class="admin-link" href="admin-listings.html">管理后台演示 →</a></nav></div>
+  <main class="account-layout">
+    <div class="page-intro"><div><p class="eyebrow">YOUR CAMPUS BOOKSHELF</p><h1>登录</h1><p>欢迎回到 BookLoop。</p></div><button type="button" id="reset-demo" class="plain">重置演示数据</button></div>
+    <div class="demo-banner">本地原型 · 当前展示演示账号与虚构资料，不代表真实登录或交易。状态和举报保存在当前标签页会话中；账号密码与联系方式不保存。<span id="storage-warning"></span></div>
+    <div id="session-strip" class="session-strip"></div>
+    <form id="login-form" class="account-form"><h2>登录账号</h2><p class="muted">仅演示表单流程，不校验真实账号，也不保存密码。</p><label>账号<input name="account" required maxlength="40" autocomplete="username" placeholder="填写演示账号"></label><label>密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="off" placeholder="至少6位，请勿使用真实密码"></label><button class="primary" type="submit">登录演示账号</button><p>还没有账号？ <a href="register.html">注册账号 →</a></p><div class="form-feedback" role="status"></div></form>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。<br>原型中的权限与校验仅演示交互，正式版本由Java后端实施。</footer>
+  <dialog id="action-dialog" aria-labelledby="action-title"><form id="action-form"><div class="dialog-head"><h2 id="action-title">确认操作</h2><button class="close" type="button" id="cancel-action" aria-label="关闭">×</button></div><p id="action-description"></p><label id="reason-label">操作说明<textarea id="action-reason" maxlength="500" rows="3"></textarea></label><div class="dialog-buttons"><button class="plain" type="button" id="back-action">取消</button><button class="primary" type="submit">确认</button></div></form></dialog>
+  <script src="js/books.js"></script>
+  <script src="js/demo-state.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>

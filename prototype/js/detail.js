@@ -20,7 +20,10 @@ const notices = {
 };
 
 document.querySelectorAll('[data-notice]').forEach(button => {
-  button.addEventListener('click', () => showNotice(...notices[button.dataset.notice]));
+  button.addEventListener('click', () => {
+    if (button.dataset.notice === 'report') return showReport();
+    showNotice(...notices[button.dataset.notice]);
+  });
 });
 
 $('close').addEventListener('click', () => $('modal').close());
@@ -36,6 +39,11 @@ $('modal').addEventListener('click', event => {
 if (!book) {
   $('missing').hidden = false;
   document.title = '资料未找到 · HUST BookLoop';
+} else if (['已售出','已送出','已下架'].includes(Demo.listing(book.id).status)) {
+  $('missing').hidden = false;
+  $('missing').querySelector('h1').textContent = '这份资料已不可获取';
+  $('missing-message').textContent = '资料已完成流转或下架，公开页面不再提供正文和联系方式。';
+  document.title = '资料不可获取 · HUST BookLoop';
 } else {
   const isFree = book.price === 0;
   document.title = `${book.title} · HUST BookLoop`;
@@ -44,7 +52,7 @@ if (!book) {
   $('book-title').textContent = book.title;
   $('category').textContent = book.category;
   $('condition').textContent = book.condition;
-  $('status').textContent = isFree ? '待赠送' : '在售';
+  $('status').textContent = Demo.listing(book.id).status;
   $('author').textContent = `${book.author} 著 / 编 · ${book.version}`;
   $('price-label').textContent = isFree ? '流转方式' : '转让价格';
   $('price').textContent = isFree ? '免费赠送' : `¥ ${book.price.toFixed(2)}`;
@@ -86,10 +94,29 @@ if (!book) {
     $('handoff-copy').textContent = '双方自行约定免费领取与交接方式。';
   }
 
-  $('contact').addEventListener('click', () => showNotice(...notices.account));
+  $('contact').textContent = Demo.state.loggedIn ? '查看演示联系方式' : '登录后联系发布者';
+  $('contact').addEventListener('click', () => {
+    if (!Demo.state.loggedIn) { location.href = 'login.html?next=' + encodeURIComponent('detail.html?id=' + book.id); return; }
+    showNotice('演示联系方式', '微信：bookloop-demo（虚构账号，请勿添加）。' + (Demo.listing(book.id).status === '已预订' ? '此资料已有意向领取者或买家，请先确认是否仍可获取。' : '此处仅演示登录后查看联系信息的流程。'));
+  });
   $('zoom-cover').addEventListener('click', () => {
     $('modal-title').textContent = `${book.title} · 封面示意`;
     $('modal-body').innerHTML = `<div class="zoom-preview">${cover}</div><p class="prototype-note">此图为本地封面示意设计，不是实物照片。</p>`;
     $('modal').showModal();
   });
 }
+
+function showReport() {
+  if (!book) return;
+  if (!Demo.state.loggedIn) { location.href = 'login.html?next=' + encodeURIComponent('detail.html?id=' + book.id); return; }
+  $('modal-title').textContent = '举报资料 · 演示';
+  $('modal-body').innerHTML = '<form id="report-form"><p>仅记录本地演示举报，可到管理后台查看。请勿填写个人信息。</p><label>举报原因<select name="reason" required><option>资料信息不准确</option><option>虚假交易信息</option><option>不当内容</option><option>其他</option></select></label><label style="display:block;margin:18px 0">补充说明<textarea name="description" maxlength="500" rows="3" style="display:block;width:100%;margin-top:8px"></textarea></label><p id="report-message" role="status"></p><button class="primary" type="submit">提交演示举报</button></form>';
+  $('report-form').onsubmit = event => {
+    event.preventDefault();
+    try {
+      Demo.addReport(book.id, event.currentTarget.elements.reason.value, event.currentTarget.elements.description.value.trim());
+      showNotice('已记录演示举报', '举报已进入本地待处理列表，可前往管理后台的举报处理页面查看。没有向服务器发送数据。');
+    } catch (error) { $('report-message').textContent = error.message; }
+  };
+}
+window.addEventListener('pageshow', event => { if (event.persisted) location.reload(); });

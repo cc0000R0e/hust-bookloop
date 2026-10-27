@@ -18,7 +18,7 @@
         </svg>
         HUST BookLoop
       </a>
-      <div class="navlinks">
+      <div class="navlinks"><a href="my-listings.html">我的发布</a><a href="profile.html">个人资料</a>
         <a href="index.html">教材市场</a>
         <button type="button" data-notice="about">关于平台</button>
         <a class="publish" href="publish.html">＋ 发布资料</a>
@@ -36,12 +36,12 @@
         <input id="search-input" name="q" type="search" placeholder="搜索书名、作者、课程或标签…">
         <button type="submit">搜索</button>
       </form>
-      <button class="profile" type="button" data-notice="account">
+      <a class="profile" href="login.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle cx="12" cy="7" r="4"/><path d="M3 22v-3c0-7 18-7 18 0v3z"/>
         </svg>
         <span>登录 / 注册</span>
-      </button>
+      </a>
     </div>
   </section>
 
@@ -118,12 +118,12 @@
           <p class="seller-note">一本读过的书，也可以成为另一段学习的开始。</p>
         </aside>
       </div>
-      <p class="demo-disclosure">原型演示：书籍信息、封面和发布者均为演示数据，不对应真实交易。登录、联系和举报尚未接入后端。</p>
+      <p class="demo-disclosure">原型演示：书籍信息、封面和发布者均为演示数据，不对应真实交易。登录、联系和举报使用本地演示流程，尚未接入后端。</p>
     </div>
 
     <section class="missing" id="missing" hidden>
       <h1>没有找到这份资料</h1>
-      <p>链接中的资料编号无效，请返回市场选择其他资料。</p>
+      <p id="missing-message">链接中的资料编号无效，请返回市场选择其他资料。</p>
       <a class="primary" href="index.html">返回教材市场</a>
     </section>
     <noscript><p>请启用JavaScript以查看演示资料详情。<a href="index.html">返回市场</a></p></noscript>
@@ -136,6 +136,7 @@
     <div id="modal-body"></div>
   </dialog>
   <script src="js/books.js"></script>
+  <script src="js/demo-state.js"></script>
   <script src="js/detail.js"></script>
 </body>
 </html>

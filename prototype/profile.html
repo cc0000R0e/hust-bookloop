@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人资料 · HUST BookLoop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body data-page="profile">
+  <header><nav class="nav" aria-label="主导航"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">▤</span> HUST BookLoop</a><div class="navlinks"><a href="index.html">教材市场</a><a class="publish" href="publish.html">＋ 发布资料</a></div></nav></header>
+  <div class="subnav"><nav aria-label="个人中心"><a href="my-listings.html">我的发布</a><a href="profile.html">个人资料</a><a href="login.html">登录 / 注册</a><a class="admin-link" href="admin-listings.html">管理后台演示 →</a></nav></div>
+  <main class="account-layout">
+    <div class="page-intro"><div><p class="eyebrow">YOUR CAMPUS BOOKSHELF</p><h1>个人资料</h1><p>让每一次联系，都简单一些。</p></div><button type="button" id="reset-demo" class="plain">重置演示数据</button></div>
+    <div class="demo-banner">本地原型 · 当前展示演示账号与虚构资料，不代表真实登录或交易。状态和举报保存在当前标签页会话中；账号密码与联系方式不保存。<span id="storage-warning"></span></div>
+    <div id="session-strip" class="session-strip"></div>
+    <div class="profile-grid"><form id="profile-form" class="panel"><h2>基本资料</h2><p class="muted">仅供当前页面预览，刷新后恢复演示值。</p><label>账号<input value="campus_reader" disabled></label><label>昵称<input name="nickname" value="校园读者" required maxlength="30"></label><label>默认联系方式<select name="type"><option>微信</option><option>QQ</option><option>手机号</option></select></label><label>联系账号<input name="contact" value="demo-contact" required maxlength="100" autocomplete="off"></label><p class="muted">更改默认联系方式不修改已有发布记录。请使用虚拟信息。</p><button class="primary" type="submit">预览修改</button><div class="form-feedback" role="status"></div></form><form id="password-form" class="panel"><h2>修改密码</h2><p class="muted">原密码演示值为 demo123，不进行真实密码修改。</p><label>原密码<input name="old" type="password" required autocomplete="off"></label><label>新密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="off"></label><label>确认新密码<input name="confirm" type="password" required minlength="6" maxlength="64" autocomplete="off"></label><button class="primary" type="submit">验证修改流程</button><div class="form-feedback" role="status"></div></form></div>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。<br>原型中的权限与校验仅演示交互，正式版本由Java后端实施。</footer>
+  <dialog id="action-dialog" aria-labelledby="action-title"><form id="action-form"><div class="dialog-head"><h2 id="action-title">确认操作</h2><button class="close" type="button" id="cancel-action" aria-label="关闭">×</button></div><p id="action-description"></p><label id="reason-label">操作说明<textarea id="action-reason" maxlength="500" rows="3"></textarea></label><div class="dialog-buttons"><button class="plain" type="button" id="back-action">取消</button><button class="primary" type="submit">确认</button></div></form></dialog>
+  <script src="js/books.js"></script>
+  <script src="js/demo-state.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>
