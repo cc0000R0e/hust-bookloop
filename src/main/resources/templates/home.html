@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HUST BookLoop · 开发入口</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <style>
+    main { max-width: 850px; margin: 80px auto; padding: 30px; }
+    h1 { font-size: 30px; margin-bottom: 25px; }
+    p { color: #78838b; line-height: 1.9; }
+    .links { display: flex; flex-wrap: wrap; gap: 12px; margin: 30px 0; }
+    .secondary { padding: 11px 18px; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>HUST BookLoop</h1>
+  <p>Spring Boot 基础工程已启动。</p>
+  <p th:text="${databaseMode}">运行模式</p>
+  <div class="links">
+    <a class="primary" th:href="@{/prototype/index.html}">进入教材市场原型</a>
+    <a class="secondary" th:href="@{/prototype/my-listings.html}">我的发布原型</a>
+    <a class="secondary" th:href="@{/prototype/admin-listings.html}">管理后台原型</a>
+  </div>
+  <p>当前页面用于验证Java服务和模板渲染。原型仍使用浏览器演示数据，
+    登录、资料发布、交易和管理操作尚未接入真实后端。</p>
+  <p>下一步：连接并验证MySQL，再实现数据库实体、真实账户和资料查询。</p>
+</main>
+</body>
+</html>

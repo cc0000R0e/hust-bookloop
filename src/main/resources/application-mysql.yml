@@ -1,0 +1,12 @@
+# Required environment variables; no fallback credentials.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-init-sql: "SET time_zone = '+00:00'"
+  jpa:
+    hibernate:
+      ddl-auto: validate

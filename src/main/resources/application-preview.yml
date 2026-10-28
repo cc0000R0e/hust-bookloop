@@ -1,0 +1,7 @@
+# Startup/HTTP preview only. This does NOT validate the MySQL schema.
+spring:
+  datasource:
+    url: jdbc:h2:mem:bookloop_preview;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
