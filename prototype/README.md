@@ -8,7 +8,7 @@
 - `publish.html?edit=1`：回填第1条演示资料，体验编辑表单；免费赠送示例可使用 `?edit=3`。
 - `my-listings.html`：我的发布，状态筛选、预订、取消预订、售出／送出、上下架和操作记录。
 - `login.html`、`register.html`：演示登录与注册表单；密码不保存，登录只记录演示状态。
-- `profile.html`：昵称、默认联系方式和密码修改表单预览。
+- `profile.html`：默认联系方式和密码修改表单预览。
 - `admin-listings.html`：管理员下架、解除限制和操作记录。
 - `admin-reports.html`：处理或驳回举报，处理时下架相关资料。
 - `admin-options.html`：专业与考试标签新增、重命名、启用和停用。

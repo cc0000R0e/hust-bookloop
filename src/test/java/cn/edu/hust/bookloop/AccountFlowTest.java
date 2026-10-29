@@ -45,8 +45,10 @@ class AccountFlowTest {
     void registersAuthenticatesAndLogsOutWithDatabaseCredentials() throws Exception {
         var client = client();
         assertThat(get(client,"/account").statusCode()).isEqualTo(302);
-        var csrf = token(get(client,"/register").body());
-        var registered = post(client,"/register",Map.of("_csrf",csrf,"username","Student_test","nickname","测试同学","password","secure123","confirmation","secure123","role","ADMIN"));
+        var registrationPage = get(client,"/register").body();
+        assertThat(registrationPage).doesNotContain("nickname", "昵称");
+        var csrf = token(registrationPage);
+        var registered = post(client,"/register",Map.of("_csrf",csrf,"username","Student_test","password","secure123","confirmation","secure123","role","ADMIN"));
         assertThat(registered.statusCode()).isEqualTo(302);
         var user = users.findByUsername("student_test").orElseThrow();
         assertThat(user.getRole()).isEqualTo("USER");
@@ -60,7 +62,7 @@ class AccountFlowTest {
         var login = post(client,"/login",Map.of("_csrf",csrf,"username","STUDENT_TEST","password","secure123"));
         assertThat(login.headers().firstValue("Location").orElseThrow()).endsWith("/account");
         var account = get(client,"/account");
-        assertThat(account.body()).contains("测试同学").doesNotContain(user.getPasswordHash());
+        assertThat(account.body()).contains("student_test").doesNotContain(user.getPasswordHash());
         assertThat(post(client,"/logout",Map.of("_csrf",token(account.body()))).statusCode()).isEqualTo(302);
         assertThat(get(client,"/account").statusCode()).isEqualTo(302);
     }
@@ -68,11 +70,13 @@ class AccountFlowTest {
     void rejectsMissingCsrfMismatchAndDuplicateAccountsWithoutEchoingPasswords() throws Exception {
         var client = client();
         assertThat(post(client,"/register",Map.of("username","test_missing")).statusCode()).isEqualTo(403);
-        var csrf = token(get(client,"/register").body());
-        var mismatch = post(client,"/register",Map.of("_csrf",csrf,"username","dup_test","nickname","测试","password","never_echo_123","confirmation","other123"));
+        var registrationPage = get(client,"/register").body();
+        assertThat(registrationPage).doesNotContain("nickname", "昵称");
+        var csrf = token(registrationPage);
+        var mismatch = post(client,"/register",Map.of("_csrf",csrf,"username","dup_test","password","never_echo_123","confirmation","other123"));
         assertThat(mismatch.body()).contains("两次输入的密码不一致").doesNotContain("never_echo_123");
         assertThat(users.findByUsername("dup_test")).isEmpty();
-        var fields = Map.of("_csrf",csrf,"username","dup_test","nickname","测试","password","secure123","confirmation","secure123");
+        var fields = Map.of("_csrf",csrf,"username","dup_test","password","secure123","confirmation","secure123");
         assertThat(post(client,"/register",fields).statusCode()).isEqualTo(302);
         assertThat(post(client,"/register",fields).body()).contains("账号已被使用");
     }

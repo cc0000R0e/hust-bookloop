@@ -21,16 +21,15 @@ public class AccountController {
     public String login(Principal principal) { return principal == null ? "login" : "redirect:/account"; }
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("username", ""); model.addAttribute("nickname", "");
+        model.addAttribute("username", "");
         return "register";
     }
     @PostMapping("/register")
     public String register(@RequestParam(defaultValue = "") String username,
-                           @RequestParam(defaultValue = "") String nickname,
                            @RequestParam(defaultValue = "") String password,
                            @RequestParam(defaultValue = "") String confirmation, Model model) {
         try {
-            accounts.register(username, nickname, password, confirmation);
+            accounts.register(username, password, confirmation);
             return "redirect:/login?registered";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("error", exception.getMessage());
@@ -39,14 +38,12 @@ public class AccountController {
             model.addAttribute("error", "账号已被使用，请更换账号后重试。");
         }
         model.addAttribute("username", username);
-        model.addAttribute("nickname", nickname);
         return "register"; // Never return passwords in the model or HTML.
     }
     @GetMapping("/account")
     public String account(Principal principal, Model model) {
         var user = users.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("username", user.getUsername());
-        model.addAttribute("nickname", user.getNickname());
         return "account";
     }
 }

@@ -7,7 +7,6 @@ CREATE TABLE app_user (
     id BIGINT NOT NULL AUTO_INCREMENT,
     username VARCHAR(40) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    nickname VARCHAR(30) NOT NULL,
     role VARCHAR(16) NOT NULL DEFAULT 'USER',
     default_contact_type VARCHAR(16) NULL,
     default_contact_value VARCHAR(100) NULL,

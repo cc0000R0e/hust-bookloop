@@ -48,6 +48,8 @@ SERVER_PORT=8081 mvn -Dmaven.repo.local=.cache/maven spring-boot:run
 
 在当前终端设置`DB_URL`、`DB_USERNAME`、`DB_PASSWORD`，例如DB_URL使用`jdbc:mysql://localhost:3306/hust_bookloop?connectionTimeZone=UTC`。密码通过本地环境设置，不提交到仓库。
 
+若数据库是旧版本创建的，`app_user`仍有必填的`nickname`列，需要先用有表结构修改权限的数据库账号执行`database/migrations/001_remove_user_nickname.sql`，再启动新版应用，否则注册可能失败。该脚本只执行一次，会删除旧昵称，保留账号、密码及用户ID。使用当前`schema.sql`新建的库无需执行。系统统一使用账号展示用户身份。
+
 ```bash
 mvn -Dmaven.repo.local=.cache/maven spring-boot:run -Dspring-boot.run.profiles=mysql
 ```

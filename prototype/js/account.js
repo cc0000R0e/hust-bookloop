@@ -164,13 +164,12 @@ if ($('login-form')) $('login-form').onsubmit = event => {
 };
 if ($('register-form')) $('register-form').onsubmit = event => {
   event.preventDefault(); const form = event.currentTarget;
-  if (!form.elements.nickname.value.trim()) {formMessage(form,'昵称不能为空。',true);return;}
   if (form.elements.password.value !== form.elements.confirm.value) {formMessage(form,'两次密码不一致。',true);return;}
   form.reset(); formMessage(form,'注册表单校验通过；未创建真实账号。可前往登录页体验演示登录。');
 };
 if ($('profile-form')) $('profile-form').onsubmit = event => {
   event.preventDefault(); const form = event.currentTarget;
-  if (!form.elements.nickname.value.trim() || !form.elements.contact.value.trim()) {formMessage(form,'昵称和联系账号不能为空。',true);return;}
+  if (!form.elements.contact.value.trim()) {formMessage(form,'联系账号不能为空。',true);return;}
   formMessage(form,'资料修改预览通过；未保存到服务器或浏览器存储，历史发布联系方式未改变。');
 };
 if ($('password-form')) $('password-form').onsubmit = event => {

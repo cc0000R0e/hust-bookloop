@@ -15,7 +15,6 @@
 <p role="alert" style="color:#a04f45" th:if="${error}" th:text="${error}"></p>
 <form th:action="@{/register}" method="post" class="account-form">
   <label>账号<input name="username" th:value="${username}" required pattern="[A-Za-z0-9_]{4,20}" maxlength="20" title="4—20位字母、数字或下划线" autocomplete="username"></label>
-  <label>昵称<input name="nickname" th:value="${nickname}" required maxlength="30" autocomplete="nickname"></label>
   <label>密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
   <label>确认密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
   <p class="muted">密码6—64位；若使用中文等字符，UTF-8总长度不能超过72字节。</p>
