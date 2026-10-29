@@ -1,5 +1,8 @@
 # Startup/HTTP preview only. This does NOT validate the MySQL schema.
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
   datasource:
     url: jdbc:h2:mem:bookloop_preview;DB_CLOSE_DELAY=-1
     username: sa

@@ -19,13 +19,16 @@
   <p>Spring Boot 基础工程已启动。</p>
   <p th:text="${databaseMode}">运行模式</p>
   <div class="links">
+    <a class="primary" th:href="@{/login}">登录</a>
+    <a class="secondary" th:href="@{/register}">注册</a>
+    <a class="secondary" th:href="@{/account}">我的账户</a>
     <a class="primary" th:href="@{/prototype/index.html}">进入教材市场原型</a>
     <a class="secondary" th:href="@{/prototype/my-listings.html}">我的发布原型</a>
     <a class="secondary" th:href="@{/prototype/admin-listings.html}">管理后台原型</a>
   </div>
-  <p>当前页面用于验证Java服务和模板渲染。原型仍使用浏览器演示数据，
-    登录、资料发布、交易和管理操作尚未接入真实后端。</p>
-  <p>下一步：连接并验证MySQL，再实现数据库实体、真实账户和资料查询。</p>
+  <p>上方账户入口已接入服务端注册、密码验证和会话。标有“原型”的页面仍使用浏览器演示数据，
+    资料发布、交易和管理操作尚未接入真实后端；原型演示登录不等于真实登录。</p>
+  <p>下一步：实现数据库资料查询与发布。</p>
 </main>
 </body>
 </html>

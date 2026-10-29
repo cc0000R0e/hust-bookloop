@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>账户 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/account.css}">
+</head>
+<body>
+  <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/login}">登录</a><a th:href="@{/register}">注册</a><a th:href="@{/account}">我的账户</a></div></nav></header>
+  <main class="account-layout" style="text-align:center">
+<h1>我的账户</h1>
+<div class="panel" style="max-width:600px;margin:30px auto">
+  <h2>你好，<span th:text="${nickname}"></span></h2>
+  <p>当前账号：<strong th:text="${username}"></strong></p>
+  <p class="muted">你已通过服务端密码验证。资料查询、发布和管理功能正在接入，现有原型仍使用独立演示数据。</p>
+  <p><a th:href="@{/prototype/index.html}">查看教材市场原型 →</a></p>
+  <form th:action="@{/logout}" method="post"><button class="primary" type="submit">退出登录</button></form>
+</div>
+    <p class="muted">MySQL模式保存真实账号；preview模式仅使用临时数据库，停止服务后数据清空。</p>
+  </main>
+</body>
+</html>

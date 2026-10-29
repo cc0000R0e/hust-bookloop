@@ -6,6 +6,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.User;
+import cn.edu.hust.bookloop.account.UserRepository;
+import cn.edu.hust.bookloop.account.AccountService;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,12 +20,24 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // The public prototype has no server-side write endpoints.
-        // Leave CSRF enabled and deny every endpoint not explicitly allowed.
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/", "/prototype/**", "/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/prototype/**", "/error").permitAll()
+                .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                .requestMatchers("/account").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/", "/prototype/**").permitAll()
-                .anyRequest().denyAll());
+                .anyRequest().denyAll())
+            .formLogin(login -> login.loginPage("/login")
+                .defaultSuccessUrl("/account", true).failureUrl("/login?error").permitAll())
+            .logout(logout -> logout.logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
+            .exceptionHandling(errors -> errors
+                .authenticationEntryPoint((request, response, exception) -> {
+                    if (request.getServletPath().equals("/account")) {
+                        new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);
+                    } else {
+                        new HttpStatusEntryPoint(HttpStatus.FORBIDDEN).commence(request, response, exception);
+                    }
+                }));
         return http.build();
     }
 
@@ -29,9 +47,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    UserDetailsService userDetailsService() {
-        // Real database-backed registration/login is the next implementation step.
-        // Do not expose Spring Boot's generated demo account.
-        return username -> { throw new UsernameNotFoundException("Account service is not implemented"); };
+    UserDetailsService userDetailsService(UserRepository users) {
+        return username -> users.findByUsername(AccountService.normalize(username))
+            .map(user -> User.withUsername(user.getUsername()).password(user.getPasswordHash())
+                .roles(user.getRole()).build())
+            .orElseThrow(() -> new UsernameNotFoundException("账号或密码错误"));
     }
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>账户 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/account.css}">
+</head>
+<body>
+  <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/login}">登录</a><a th:href="@{/register}">注册</a><a th:href="@{/account}">我的账户</a></div></nav></header>
+  <main class="account-layout" style="text-align:center">
+<h1>创建账号</h1>
+<p class="muted">账号不区分英文字母大小写。注册后使用账号和密码登录。</p>
+<p role="alert" style="color:#a04f45" th:if="${error}" th:text="${error}"></p>
+<form th:action="@{/register}" method="post" class="account-form">
+  <label>账号<input name="username" th:value="${username}" required pattern="[A-Za-z0-9_]{4,20}" maxlength="20" title="4—20位字母、数字或下划线" autocomplete="username"></label>
+  <label>昵称<input name="nickname" th:value="${nickname}" required maxlength="30" autocomplete="nickname"></label>
+  <label>密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
+  <label>确认密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
+  <p class="muted">密码6—64位；若使用中文等字符，UTF-8总长度不能超过72字节。</p>
+  <button class="primary" type="submit">注册</button>
+  <p>已有账号？ <a th:href="@{/login}">前往登录 →</a></p>
+</form>
+    <p class="muted">MySQL模式保存真实账号；preview模式仅使用临时数据库，停止服务后数据清空。</p>
+  </main>
+</body>
+</html>
