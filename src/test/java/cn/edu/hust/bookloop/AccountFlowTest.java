@@ -80,4 +80,42 @@ class AccountFlowTest {
         assertThat(post(client,"/register",fields).statusCode()).isEqualTo(302);
         assertThat(post(client,"/register",fields).body()).contains("账号已被使用");
     }
+
+    @Test
+    void updatesOnlyOwnContactAndRequiresOriginalPassword() throws Exception {
+        var client = client();
+        var csrf = token(get(client, "/register").body());
+        assertThat(post(client, "/register", Map.of("_csrf", csrf, "username", "profile_test",
+            "password", "secure123", "confirmation", "secure123")).statusCode()).isEqualTo(302);
+        csrf = token(get(client, "/register").body());
+        post(client, "/register", Map.of("_csrf", csrf, "username", "other_user",
+            "password", "secure123", "confirmation", "secure123"));
+        csrf = token(get(client, "/login").body());
+        post(client, "/login", Map.of("_csrf", csrf, "username", "profile_test", "password", "secure123"));
+        csrf = token(get(client, "/account").body());
+        assertThat(post(client, "/account/contact", Map.of("type", "QQ", "value", "12345")).statusCode()).isEqualTo(403);
+        assertThat(post(client, "/account/contact", Map.of("_csrf", csrf, "type", "QQ", "value", "12345",
+            "username", "other_user")).statusCode()).isEqualTo(302);
+        assertThat(users.findByUsername("profile_test").orElseThrow().getDefaultContactValue()).isEqualTo("12345");
+        assertThat(users.findByUsername("other_user").orElseThrow().getDefaultContactValue()).isNull();
+        assertThat(get(client, "/account").body()).contains("12345");
+        assertThat(post(client, "/account/contact", Map.of("_csrf", csrf, "type", "INVALID", "value", "bad"))
+            .body()).contains("请选择联系方式类型");
+        assertThat(users.findByUsername("profile_test").orElseThrow().getDefaultContactValue()).isEqualTo("12345");
+        post(client, "/account/contact", Map.of("_csrf", csrf, "type", "", "value", ""));
+        assertThat(users.findByUsername("profile_test").orElseThrow().getDefaultContactValue()).isNull();
+        assertThat(post(client, "/account/password", Map.of("_csrf", csrf, "oldPassword", "wrong",
+            "password", "changed456", "confirmation", "changed456")).body()).contains("原密码错误");
+        assertThat(encoder.matches("secure123", users.findByUsername("profile_test").orElseThrow().getPasswordHash())).isTrue();
+        var changed = post(client, "/account/password", Map.of("_csrf", csrf, "oldPassword", "secure123",
+            "password", "changed456", "confirmation", "changed456"));
+        assertThat(changed.headers().firstValue("Location").orElseThrow()).endsWith("/login?passwordChanged");
+        assertThat(get(client, "/account").statusCode()).isEqualTo(302);
+        csrf = token(get(client, "/login").body());
+        assertThat(post(client, "/login", Map.of("_csrf", csrf, "username", "profile_test", "password", "secure123"))
+            .headers().firstValue("Location").orElseThrow()).endsWith("/login?error");
+        csrf = token(get(client, "/login").body());
+        assertThat(post(client, "/login", Map.of("_csrf", csrf, "username", "profile_test", "password", "changed456"))
+            .headers().firstValue("Location").orElseThrow()).endsWith("/account");
+    }
 }

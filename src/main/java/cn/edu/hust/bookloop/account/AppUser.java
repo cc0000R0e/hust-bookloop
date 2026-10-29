@@ -28,5 +28,12 @@ public class AppUser {
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getPasswordHash() { return passwordHash; }
+    public String getDefaultContactType() { return defaultContactType; }
+    public String getDefaultContactValue() { return defaultContactValue; }
+    public void updateContact(String type, String value) {
+        this.defaultContactType = type;
+        this.defaultContactValue = value;
+    }
+    public void changePassword(String hash) { this.passwordHash = hash; }
     public String getRole() { return role; }
 }

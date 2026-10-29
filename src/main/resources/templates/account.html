@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --server.port=8081<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
@@ -14,8 +14,30 @@
 <div class="panel" style="max-width:600px;margin:30px auto">
   <h2>你好，<span th:text="${username}"></span></h2>
   <p>当前账号：<strong th:text="${username}"></strong></p>
-  <p class="muted">你已通过服务端密码验证。资料查询、发布和管理功能正在接入，现有原型仍使用独立演示数据。</p>
+  <p class="muted">你已通过服务端密码验证。书籍查询、发布和管理功能正在接入，现有原型仍使用独立演示数据。</p>
   <p><a th:href="@{/prototype/index.html}">查看教材市场原型 →</a></p>
+  <p th:if="${success}" th:text="${success}" role="status"></p>
+  <p th:if="${error}" th:text="${error}" role="alert"></p>
+  <form class="account-form" th:action="@{/account/contact}" method="post">
+    <h2>默认联系方式</h2>
+    <label>联系方式类型<select name="type">
+      <option value="" th:selected="${contactType == null or contactType == ''}">未设置</option>
+      <option value="WECHAT" th:selected="${contactType == 'WECHAT'}">微信</option>
+      <option value="QQ" th:selected="${contactType == 'QQ'}">QQ</option>
+      <option value="PHONE" th:selected="${contactType == 'PHONE'}">手机号</option>
+    </select></label>
+    <label>联系账号<input name="value" th:value="${contactValue}" maxlength="100"></label>
+    <p class="muted">修改默认联系方式不会改变已发布书籍的联系方式。两项同时清空可取消设置。</p>
+    <button class="primary" type="submit">保存联系方式</button>
+  </form>
+  <form class="account-form" th:action="@{/account/password}" method="post">
+    <h2>修改密码</h2>
+    <label>原密码<input name="oldPassword" type="password" required autocomplete="current-password"></label>
+    <label>新密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
+    <label>确认新密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
+    <p class="muted">修改后需要重新登录。</p>
+    <button class="primary" type="submit">修改密码</button>
+  </form>
   <form th:action="@{/logout}" method="post"><button class="primary" type="submit">退出登录</button></form>
 </div>
     <p class="muted">MySQL模式保存真实账号；preview模式仅使用临时数据库，停止服务后数据清空。</p>

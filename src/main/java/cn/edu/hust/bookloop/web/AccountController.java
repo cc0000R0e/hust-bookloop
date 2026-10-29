@@ -44,6 +44,43 @@ public class AccountController {
     public String account(Principal principal, Model model) {
         var user = users.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("username", user.getUsername());
+        model.addAttribute("contactType", user.getDefaultContactType());
+        model.addAttribute("contactValue", user.getDefaultContactValue());
         return "account";
+    }
+
+    @PostMapping("/account/contact")
+    public String contact(Principal principal, @RequestParam(defaultValue = "") String type,
+                          @RequestParam(defaultValue = "") String value, Model model,
+                          org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
+        try {
+            accounts.updateContact(principal.getName(), type, value);
+            redirect.addFlashAttribute("success", "默认联系方式已保存。");
+            return "redirect:/account";
+        } catch (IllegalArgumentException exception) {
+            account(principal, model);
+            model.addAttribute("contactType", type);
+            model.addAttribute("contactValue", value);
+            model.addAttribute("error", exception.getMessage());
+            return "account";
+        }
+    }
+
+    @PostMapping("/account/password")
+    public String password(Principal principal, @RequestParam(defaultValue = "") String oldPassword,
+                           @RequestParam(defaultValue = "") String password,
+                           @RequestParam(defaultValue = "") String confirmation, Model model,
+                           jakarta.servlet.http.HttpServletRequest request,
+                           jakarta.servlet.http.HttpServletResponse response) {
+        try {
+            accounts.changePassword(principal.getName(), oldPassword, password, confirmation);
+            new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                .logout(request, response,
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+            return "redirect:/login?passwordChanged";
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("error", exception.getMessage());
+            return account(principal, model);
+        }
     }
 }

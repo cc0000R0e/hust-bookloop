@@ -23,7 +23,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                .requestMatchers("/account").authenticated()
+                .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/", "/prototype/**").permitAll()
                 .anyRequest().denyAll())
             .formLogin(login -> login.loginPage("/login")
@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
             .exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) -> {
-                    if (request.getServletPath().equals("/account")) {
+                    if (request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")) {
                         new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);
                     } else {
                         new HttpStatusEntryPoint(HttpStatus.FORBIDDEN).commence(request, response, exception);
