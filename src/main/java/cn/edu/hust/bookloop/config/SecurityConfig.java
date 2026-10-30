@@ -21,10 +21,10 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/prototype/**", "/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                 .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
-                .requestMatchers(HttpMethod.HEAD, "/", "/prototype/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/prototype/**").permitAll()
                 .anyRequest().denyAll())
             .formLogin(login -> login.loginPage("/login")
                 .defaultSuccessUrl("/account", true).failureUrl("/login?error").permitAll())

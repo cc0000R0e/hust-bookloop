@@ -1,0 +1,26 @@
+/* Database-backed market additions to the shared prototype style. */
+.placeholder-cover { --bg: #e2e9e4; --fg: #354b40; }
+.placeholder-cover .book-title { font-size: 20px; overflow-wrap: anywhere; }
+.card:nth-child(3n + 2) .placeholder-cover { --bg: #e9dfd1; --fg: #665343; }
+.card:nth-child(3n) .placeholder-cover { --bg: #dce5ee; --fg: #364e65; }
+.card:hover { transform: none; }
+.card-title, .course, .scope-list { overflow-wrap: anywhere; }
+.course { margin: 0 0 10px; color: var(--muted); font-size: 12px; }
+.scope-list { padding: 0; margin: 12px 0 0; list-style: none; color: #727b80; font-size: 11px; line-height: 1.8; }
+.availability { margin-top: 7px; color: var(--muted); font-size: 11px; }
+.apply-filter, .apply-sort { display: inline-block; border: 0; border-radius: 4px; padding: 10px 15px; background: var(--ink); color: white; }
+.apply-sort { padding: 7px 10px; }
+.price-range { display: flex; align-items: center; gap: 6px; }
+.price-range input { width: 95px; border: 1px solid var(--line); border-radius: 4px; padding: 9px; }
+.tag-picker { position: relative; color: #555d64; }
+.tag-picker summary { border: 1px solid #e0e2e4; border-radius: 4px; padding: 9px 11px; cursor: pointer; }
+.tag-options { position: absolute; z-index: 4; top: 100%; left: 0; width: 230px; max-height: 300px; overflow: auto; padding: 14px; border: 1px solid var(--line); background: white; box-shadow: 0 6px 16px #00000012; }
+.tag-options label { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
+.tag-options small { display: block; margin-top: 8px; color: var(--muted); }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pagination a { padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; }
+@media (max-width: 650px) {
+  .navlinks a { display: block; font-size: 12px; }
+  .profile { font-size: 12px; }
+  .bottom { flex-direction: column; gap: 20px; }
+}

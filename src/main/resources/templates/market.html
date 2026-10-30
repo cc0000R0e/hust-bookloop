@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>教材市场 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/market.css}">
+</head>
+<body>
+  <header>
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" th:href="@{/}">
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M3 6h12l3 2 3-2h12v25H21l-3 2-3-2H3z" fill="#f4eeeb"/><path d="M3 6v25h12l3 2 3-2h12V6M18 8v25" stroke="currentColor" stroke-width="2"/></svg>
+        HUST BookLoop
+      </a>
+      <div class="navlinks"><a class="active" th:href="@{/market}" aria-current="page">教材市场</a><a th:href="@{/account}">我的账户</a></div>
+    </nav>
+  </header>
+  <section class="search-band" aria-label="搜索资料">
+    <div class="search-inner">
+      <form class="search" id="market-filters" th:action="@{/market}" method="get">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg>
+        <label class="sr-only" for="q">搜索书名、作者、课程或标签</label>
+        <input id="q" name="q" type="search" maxlength="100" th:value="${filter.q}" placeholder="搜索书名、作者、课程或标签…">
+        <button type="submit">搜索</button>
+      </form>
+      <a class="profile" th:href="${username == null} ? @{/login} : @{/account}" th:text="${username == null ? '登录 / 注册' : username}"></a>
+    </div>
+  </section>
+  <main class="workspace" id="market">
+    <div class="page-heading"><h1>教材市场</h1><span class="subtitle">让读过的书，继续下一段旅程。</span></div>
+    <section class="filters" aria-label="筛选资料">
+      <label><span class="sr-only">专业</span><select name="major" form="market-filters">
+        <option value="">全部专业</option>
+        <option value="0" th:selected="${filter.major != null and filter.major == 0}">不限专业</option>
+        <option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}" th:selected="${filter.major == major.id}"></option>
+      </select></label>
+      <label><span class="sr-only">学期</span><select name="semester" form="market-filters">
+        <option value="">不限学期</option>
+        <option th:each="entry : ${semesters}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filter.semester == entry.key}"></option>
+      </select></label>
+      <label><span class="sr-only">类别</span><select name="category" form="market-filters">
+        <option value="">全部类别</option>
+        <option th:each="entry : ${categories}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filter.category == entry.key}"></option>
+      </select></label>
+      <details class="tag-picker" th:open="${!filter.tags.isEmpty()}">
+        <summary th:text="${filter.tags.isEmpty() ? '考试 / 用途标签' : '已选 ' + filter.tags.size() + ' 个标签'}"></summary>
+        <div class="tag-options">
+          <span th:if="${tags.isEmpty()}">暂无标签</span>
+          <label th:each="tag : ${tags}"><input type="checkbox" name="tags" form="market-filters" th:value="${tag.id}" th:checked="${filter.tags.contains(tag.id)}"><span th:text="${tag.name}"></span></label>
+          <small>可多选，匹配其中任一标签。</small>
+        </div>
+      </details>
+      <label><span class="sr-only">流转方式</span><select name="mode" form="market-filters">
+        <option value="all" th:selected="${filter.mode == 'all'}">全部流转方式</option>
+        <option value="sale" th:selected="${filter.mode == 'sale'}">出售</option>
+        <option value="free" th:selected="${filter.mode == 'free'}">免费赠送</option>
+      </select></label>
+      <label><span class="sr-only">成色</span><select name="condition" form="market-filters">
+        <option value="">全部成色</option>
+        <option th:each="entry : ${conditions}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filter.condition == entry.key}"></option>
+      </select></label>
+      <div class="price-range">
+        <label><span class="sr-only">最低价格</span><input name="minPrice" form="market-filters" type="number" min="0" max="9999.99" step="0.01" placeholder="最低价" th:value="${filter.minPrice}"></label>
+        <span>—</span>
+        <label><span class="sr-only">最高价格</span><input name="maxPrice" form="market-filters" type="number" min="0" max="9999.99" step="0.01" placeholder="最高价" th:value="${filter.maxPrice}"></label>
+      </div>
+      <button class="apply-filter" type="submit" form="market-filters">应用筛选</button>
+      <a class="reset" th:href="@{/market}">重置筛选</a>
+    </section>
+    <div class="results-bar">
+      <span role="status">共 <strong th:text="${result.totalElements}">0</strong> 条可获取资料</span>
+      <label class="sort">排序<select name="sort" form="market-filters">
+        <option value="new" th:selected="${filter.sort == 'new'}">最新发布</option>
+        <option value="low" th:selected="${filter.sort == 'low'}">价格从低到高</option>
+        <option value="high" th:selected="${filter.sort == 'high'}">价格从高到低</option>
+      </select><button class="apply-sort" type="submit" form="market-filters">确定</button></label>
+    </div>
+    <section class="grid" aria-label="资料列表">
+      <article class="card" th:each="book : ${result.content}" th:attr="data-id=${book.id}">
+        <div class="cover-stage">
+          <span class="condition" th:text="${book.condition}"></span>
+          <div class="book minimal placeholder-cover" aria-hidden="true">
+            <span class="book-top">BOOKLOOP · CAMPUS LIBRARY</span>
+            <span class="book-title" th:text="${book.title}"></span><span class="book-art"></span>
+            <span class="book-foot">书籍封面占位</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title" th:text="${book.title}"></h2>
+          <span class="author" th:text="${#strings.isEmpty(book.author) ? '作者未填写' : book.author}"></span>
+          <p class="course" th:if="${!#strings.isEmpty(book.course)}" th:text="${book.course}"></p>
+          <div class="tags"><span class="tag" th:text="${book.category}"></span><span class="tag" th:each="tag : ${book.tags}" th:text="${tag}"></span></div>
+          <ul class="scope-list"><li th:each="scope : ${book.scopes}" th:text="${scope}"></li></ul>
+          <span class="price free" th:if="${book.gift}">免费赠送</span>
+          <span class="price" th:unless="${book.gift}"><small>¥</small><span th:text="${#numbers.formatDecimal(book.price, 1, 2)}"></span></span>
+          <span class="availability" th:text="${book.gift ? '待赠送' : '在售'}"></span>
+        </div>
+      </article>
+      <div class="empty" th:if="${result.empty}"><h2>暂时没有匹配的资料</h2><p>试试其他关键词，或减少筛选条件。</p><a class="apply-filter" th:href="@{/market}">清除筛选</a></div>
+    </section>
+    <div class="bottom">
+      <span>资料适用信息由发布者提供，请结合课程要求确认。</span>
+      <nav class="pagination" aria-label="分页">
+        <a th:if="${result.hasPrevious()}" th:href="${previousUrl}" rel="prev">上一页</a>
+        <span th:if="${result.totalPages > 0}" th:text="'第 ' + ${result.number + 1} + ' 页 / 共 ' + ${result.totalPages} + ' 页'"></span>
+        <a th:if="${result.hasNext()}" th:href="${nextUrl}" rel="next">下一页</a>
+      </nav>
+    </div>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。</footer>
+</body>
+</html>

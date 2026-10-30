@@ -1,4 +1,4 @@
-# Startup/HTTP preview only. This does NOT validate the MySQL schema.
+# Temporary account/market preview tables only. This does NOT validate the full MySQL schema.
 spring:
   jpa:
     hibernate:
