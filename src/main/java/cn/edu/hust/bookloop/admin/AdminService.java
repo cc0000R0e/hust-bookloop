@@ -96,35 +96,31 @@ public class AdminService {
     }
 
     @Transactional
-    public void handleReport(long reportId, String decision, String rawNote, boolean blockListing,
-                             String rawAdminReason, long expectedReportVersion, String username) {
+    public void handleReport(long reportId, String decision, String rawReason,
+                             long expectedReportVersion, String username) {
         var admin = admin(username);
         if (!DECISIONS.contains(decision)) throw new AdminFailure(HttpStatus.BAD_REQUEST, "请选择处理或驳回。");
-        String note = requiredText(rawNote, "请填写处理说明。", 500);
-        if (blockListing && !"RESOLVED".equals(decision)) {
-            throw new AdminFailure(HttpStatus.BAD_REQUEST, "驳回举报时不能同时下架资料。");
-        }
+        String reason = requiredText(rawReason, "请填写处理理由。", 500);
         var report = reports.findByIdForUpdate(reportId)
                 .orElseThrow(() -> new AdminFailure(HttpStatus.NOT_FOUND, "举报不存在。"));
         if (!"PENDING".equals(report.getStatus())) throw new AdminFailure("该举报已经处理。");
         if (report.getRowVersion() != expectedReportVersion) {
             throw new AdminFailure("举报已被其他管理员处理，请刷新页面。");
         }
-        if (blockListing) {
-            String adminReason = requiredText(rawAdminReason, "下架资料时必须填写管理员原因。", 500);
-            var listing = listings.findByIdForUpdate(report.getListingId())
-                    .orElseThrow(() -> new AdminFailure(HttpStatus.NOT_FOUND, "关联资料不存在。"));
+        var listing = listings.findByIdForUpdate(report.getListingId())
+                .orElseThrow(() -> new AdminFailure(HttpStatus.NOT_FOUND, "关联资料不存在。"));
+        if (!listing.isAdminBlocked()) {
             try {
                 String before = snapshot(listing);
-                listing.blockByAdmin(adminReason);
+                listing.blockByAdmin(reason);
                 em.flush();
                 em.persist(new ListingEvent(listing.getId(), admin.getId(), admin.getRole(), "ADMIN_BLOCK",
-                        before, snapshot(listing), adminReason));
+                        before, snapshot(listing), reason));
             } catch (IllegalArgumentException | IllegalStateException exception) {
                 throw new AdminFailure(exception.getMessage());
             }
         }
-        report.handle(admin.getId(), decision, note);
+        report.handle(admin.getId(), decision, reason);
         reports.flush();
     }
 

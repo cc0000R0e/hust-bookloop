@@ -138,14 +138,11 @@
   font: inherit;
 }
 
-.report-decision .admin-check {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.report-decision .admin-check input {
-  width: auto;
+.report-panel-note {
+  margin: 0;
+  color: #7a4a35;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .report-decision button,

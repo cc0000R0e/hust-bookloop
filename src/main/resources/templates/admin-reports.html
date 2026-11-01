@@ -21,7 +21,7 @@
 </header>
 <main class="admin-page">
   <div class="admin-heading">
-    <div><p class="eyebrow">ADMIN · REPORTS</p><h1>待处理举报</h1><p>核实情况后处理或驳回，必要时下架关联资料。</p></div>
+    <div><p class="eyebrow">ADMIN · REPORTS</p><h1>待处理举报</h1><p>核实情况后处理或驳回，提交后统一由管理员下架关联资料。</p></div>
     <span class="admin-count" th:text="${result.totalElements} + ' 条待处理'"></span>
   </div>
   <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status"></p>
@@ -55,20 +55,11 @@
             <option value="REJECTED">驳回举报</option>
           </select>
         </label>
-        <label>处理说明
-          <textarea name="resolutionNote" required maxlength="500" rows="3"
-                    placeholder="说明核实结论和处理结果。"></textarea>
+        <label>处理理由
+          <textarea name="reason" required maxlength="500" rows="3"
+                    placeholder="填写核实结论；该理由同时用于管理员下架。"></textarea>
         </label>
-        <div th:if="${!report.listingBlocked}">
-          <label class="admin-check">
-            <input type="checkbox" name="blockListing" value="true" class="block-toggle">
-            同时下架关联资料
-          </label>
-          <label>管理员下架原因
-            <input name="adminReason" class="block-reason" maxlength="500"
-                   placeholder="选择下架时必填。">
-          </label>
-        </div>
+        <p class="report-panel-note">提交后无论处理或驳回，关联资料都会由管理员下架。</p>
         <button type="submit">提交处理结果</button>
       </form>
     </article>
@@ -85,15 +76,5 @@
     <a th:if="${result.hasNext()}" th:href="${nextUrl}">下一页</a>
   </nav>
 </main>
-<script>
-  document.querySelectorAll(".report-decision").forEach((form) => {
-    const toggle = form.querySelector(".block-toggle");
-    const reason = form.querySelector(".block-reason");
-    if (!toggle || !reason) return;
-    const sync = () => { reason.required = toggle.checked; };
-    toggle.addEventListener("change", sync);
-    sync();
-  });
-</script>
 </body>
 </html>

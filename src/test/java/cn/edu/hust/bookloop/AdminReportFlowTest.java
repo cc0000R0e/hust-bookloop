@@ -136,7 +136,7 @@ class AdminReportFlowTest {
         login(normal, "admin_normal");
         assertThat(get(normal, "/admin/reports").statusCode()).isEqualTo(403);
         assertThat(post(normal, "/admin/reports/" + reportId() + "/handle",
-                Map.of("decision", "RESOLVED", "resolutionNote", "越权处理")).statusCode()).isEqualTo(403);
+                Map.of("decision", "RESOLVED", "reason", "越权处理")).statusCode()).isEqualTo(403);
         assertThat(jdbc.queryForObject("select status from report", String.class)).isEqualTo("PENDING");
 
         var admin = client();
@@ -144,7 +144,8 @@ class AdminReportFlowTest {
         var queue = get(admin, "/admin/reports");
         assertThat(queue.statusCode()).isEqualTo(200);
         assertThat(queue.body()).contains("待审核资料", "admin_reporter", "描述与实物不符",
-                "处理举报", "驳回举报", "同时下架关联资料");
+                "处理举报", "驳回举报", "处理理由", "都会由管理员下架")
+                .doesNotContain("同时下架关联资料", "管理员下架原因");
         assertThat(get(admin, "/admin/listings").statusCode()).isEqualTo(200);
     }
 
@@ -156,15 +157,13 @@ class AdminReportFlowTest {
         String adminToken = csrf(get(admin, "/admin/reports").body());
         var handled = post(admin, "/admin/reports/" + reportId() + "/handle?_csrf=" + encode(adminToken), Map.of(
                 "decision", "RESOLVED",
-                "resolutionNote", "核实后下架",
-                "blockListing", "true",
-                "adminReason", "信息与实物严重不符",
+                "reason", "信息与实物严重不符",
                 "expectedVersion", "0"));
         assertThat(handled.statusCode()).isEqualTo(302);
 
         assertThat(jdbc.queryForObject("select status from report", String.class)).isEqualTo("RESOLVED");
         assertThat(jdbc.queryForObject("select handler_id from report", Long.class)).isEqualTo(9704L);
-        assertThat(jdbc.queryForObject("select resolution_note from report", String.class)).isEqualTo("核实后下架");
+        assertThat(jdbc.queryForObject("select resolution_note from report", String.class)).isEqualTo("信息与实物严重不符");
         assertThat(jdbc.queryForObject("select handled_at from report", Object.class)).isNotNull();
         assertThat(jdbc.queryForObject("select admin_blocked from listing where id = 601", Boolean.class)).isTrue();
         assertThat(jdbc.queryForObject("select admin_reason from listing where id = 601", String.class))
@@ -197,7 +196,7 @@ class AdminReportFlowTest {
     }
 
     @Test
-    void rejectingLeavesListingUntouchedAndRequiresResolutionNote() throws Exception {
+    void rejectingAlsoBlocksListingAndRequiresOneReason() throws Exception {
         reportService.submit(603, "OTHER", "需要管理员核实", "admin_reporter");
         var admin = client();
         login(admin, "the_admin");
@@ -210,10 +209,14 @@ class AdminReportFlowTest {
 
         post(admin, "/admin/reports/" + reportId() + "/handle?_csrf=" + encode(token), Map.of(
                 "decision", "REJECTED",
-                "resolutionNote", "举报内容不成立",
+                "reason", "举报内容不成立",
                 "expectedVersion", "0"));
         assertThat(jdbc.queryForObject("select status from report", String.class)).isEqualTo("REJECTED");
-        assertThat(jdbc.queryForObject("select admin_blocked from listing where id = 603", Boolean.class)).isFalse();
+        assertThat(jdbc.queryForObject("select admin_blocked from listing where id = 603", Boolean.class)).isTrue();
+        assertThat(jdbc.queryForObject("select admin_reason from listing where id = 603", String.class))
+                .isEqualTo("举报内容不成立");
+        assertThat(jdbc.queryForObject("select count(*) from listing_event where listing_id = 603 "
+                + "and action_code = 'ADMIN_BLOCK' and reason = '举报内容不成立'", Long.class)).isEqualTo(1);
     }
 
     @Test

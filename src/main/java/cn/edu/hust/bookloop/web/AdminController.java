@@ -26,15 +26,12 @@ public class AdminController {
 
     @PostMapping("/admin/reports/{id}/handle")
     public String handleReport(@PathVariable long id, @RequestParam String decision,
-                               @RequestParam(defaultValue = "") String resolutionNote,
-                               @RequestParam(defaultValue = "false") boolean blockListing,
-                               @RequestParam(defaultValue = "") String adminReason,
+                               @RequestParam(defaultValue = "") String reason,
                                @RequestParam(defaultValue = "-1") long expectedVersion,
                                Principal principal, RedirectAttributes redirect) {
         try {
-            adminService.handleReport(id, decision, resolutionNote, blockListing, adminReason,
-                    expectedVersion, principal.getName());
-            redirect.addFlashAttribute("success", "举报已处理。");
+            adminService.handleReport(id, decision, reason, expectedVersion, principal.getName());
+            redirect.addFlashAttribute("success", "举报已处理，关联资料已下架。");
         } catch (AdminFailure exception) {
             redirect.addFlashAttribute("error", exception.getMessage());
         }
