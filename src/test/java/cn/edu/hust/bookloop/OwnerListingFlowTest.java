@@ -194,8 +194,12 @@ class OwnerListingFlowTest {
         assertThat(myListings.body()).contains("待管理教材", "在售", "标记已预订", "编辑");
 
         String token = csrf(get(client, "/my/listings").body());
-        assertThat(post(client, "/books/" + id + "/status?_csrf=" + encode(token),
-                Map.of("action", "reserve", "expectedVersion", "0")).statusCode()).isEqualTo(302);
+        var reserveResponse = post(client, "/books/" + id + "/status?_csrf=" + encode(token),
+                Map.of("action", "reserve", "expectedVersion", "0"));
+        assertThat(reserveResponse.statusCode()).isEqualTo(302);
+        assertThat(reserveResponse.headers().firstValue("Location").orElseThrow()).endsWith("/my/listings");
+        var reserveResultPage = get(client, "/my/listings");
+        assertThat(reserveResultPage.body()).contains("资料已标记为已预订。", "owner-inline-flash success");
         assertThat(jdbc.queryForObject("select lifecycle_status from listing where id = ?", String.class, id))
                 .isEqualTo("RESERVED");
         assertThat(version(id)).isEqualTo(1);

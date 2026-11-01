@@ -29,9 +29,6 @@
     <a class="primary" th:href="@{/books/new}">＋ 发布新资料</a>
   </div>
 
-  <p class="flash success" th:if="${success}" th:text="${success}" role="status"></p>
-  <p class="flash error" th:if="${error}" th:text="${error}" role="alert"></p>
-
   <nav class="status-tabs" aria-label="按状态筛选">
     <a th:each="item : ${statuses}" th:href="@{/my/listings(status=${item.value})}"
        th:text="${item.label}" th:classappend="${selectedStatus == item.value} ? ' active'">
@@ -50,6 +47,12 @@
           <span class="owner-status" th:text="${listing.status}"></span>
         </div>
         <h2><a th:href="@{/books/{id}(id=${listing.id})}" th:text="${listing.title}"></a></h2>
+        <p class="owner-inline-flash success"
+           th:if="${success != null and updatedListingId == listing.id}"
+           th:text="${success}" role="status"></p>
+        <p class="owner-inline-flash error"
+           th:if="${error != null and failedListingId == listing.id}"
+           th:text="${error}" role="alert"></p>
         <p class="owner-facts"><strong th:text="${listing.price}"></strong><span th:text="'发布于 ' + ${listing.publishedAt}"></span></p>
         <p class="owner-note" th:if="${listing.restricted}">该资料已被管理员限制，发布者不能自行恢复。</p>
       </div>

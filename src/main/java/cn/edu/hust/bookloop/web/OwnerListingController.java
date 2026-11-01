@@ -110,6 +110,7 @@ public class OwnerListingController {
                          Principal principal, RedirectAttributes redirect) {
         try {
             ownerListings.changeStatus(id, action, expectedVersion, principal.getName());
+            redirect.addFlashAttribute("updatedListingId", id);
             redirect.addFlashAttribute("success", switch (action) {
                 case "reserve" -> "资料已标记为已预订。";
                 case "cancel" -> "预订已取消，资料重新公开。";
@@ -119,9 +120,11 @@ public class OwnerListingController {
                 default -> "资料状态已更新。";
             });
         } catch (ManageFailure exception) {
+            redirect.addFlashAttribute("failedListingId", id);
             redirect.addFlashAttribute("error", exception.getMessage());
         } catch (DataAccessException | jakarta.persistence.PersistenceException
                  | org.springframework.transaction.TransactionException exception) {
+            redirect.addFlashAttribute("failedListingId", id);
             redirect.addFlashAttribute("error", "资料保存失败，请刷新页面后重试。");
         }
         return "redirect:/my/listings";
