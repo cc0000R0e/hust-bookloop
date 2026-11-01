@@ -16,6 +16,7 @@ java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --se
   <p>当前账号：<strong th:text="${username}"></strong></p>
   <p class="muted">你已通过服务端密码验证。书籍市场查询已接入，发布和管理功能正在接入，现有原型仍使用独立演示数据。</p>
   <p><a th:href="@{/market}">进入教材市场 →</a></p>
+  <p><a th:href="@{/books/new}">填写发布资料 →</a></p>
   <p th:if="${success}" th:text="${success}" role="status"></p>
   <p th:if="${error}" th:text="${error}" role="alert"></p>
   <form class="account-form" th:action="@{/account/contact}" method="post">

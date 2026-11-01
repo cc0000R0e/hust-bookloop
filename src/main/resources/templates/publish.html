@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>填写发布资料 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/publish.css}">
+</head>
+<body>
+  <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/market}">教材市场</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}" aria-current="page">＋ 发布资料</a></div></nav></header>
+  <main class="publish-layout">
+    <div class="page-title"><div><p class="eyebrow">PASS A BOOK FORWARD</p><h1>让闲置的书，遇见下一位读者。</h1><p>填写资料信息，选择出售或免费赠送。</p></div></div>
+    <p class="prototype-banner">当前开放表单填写和提交校验；提交后显示预览，尚不会保存图片或发布到市场。</p>
+    <div class="form-layout">
+      <form id="publish-form" th:object="${form}" th:action="@{/books/preview(_csrf=${_csrf.token})}" method="post" enctype="multipart/form-data">
+        <section th:if="${#fields.hasAnyErrors()}" class="prototype-banner" role="alert"><strong>请检查必填项、字数限制和以下提示：</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></section>
+        <section th:if="${previewReady}" class="prototype-banner" role="status">
+          <h2>表单校验通过，尚未发布</h2><p><strong th:text="*{title}"></strong> · <span th:text="*{transferType == 'GIFT' ? '免费赠送' : '出售'}"></span><span th:if="*{transferType == 'SALE'}" th:text="' · ¥' + *{price}"></span></p>
+          <p th:text="'已接收并检查 ' + ${photoCount} + ' 张照片；本次未持久保存任何文件或发布记录。'"></p>
+        </section>
+        <section class="form-section">
+          <h2><span>01</span> 基本信息</h2>
+          <div class="field"><label for="title">资料名称 <em>*</em></label><input th:field="*{title}" required maxlength="100" placeholder="例如：数据结构（C语言版）"></div>
+          <div class="field"><label for="category">资料类别 <em>*</em></label><select th:field="*{category}" required><option value="">请选择类别</option><option th:each="item : ${categories}" th:value="${item.key}" th:text="${item.value}"></option></select></div>
+          <div class="two-columns"><div class="field"><label for="author">作者 <small>选填</small></label><input th:field="*{author}" maxlength="100"></div><div class="field"><label for="publisher">出版社 <small>选填</small></label><input th:field="*{publisher}" maxlength="100"></div></div>
+          <div class="field"><label for="editionNote">版次 / 版本说明 <small>选填</small></label><input th:field="*{editionNote}" maxlength="100" placeholder="例如：第3版"></div>
+        </section>
+        <section class="form-section">
+          <h2><span>02</span> 图片与使用情况</h2>
+          <label class="field-label" for="photos">实物照片 <em>*</em></label>
+          <div class="upload-box"><strong>选择书籍封面、内页或使用痕迹照片</strong><p>1—6张，每张不超过5MB · JPG / PNG / WebP</p><input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required aria-describedby="image-help"></div>
+          <p class="hint" id="image-help">可以分批添加、删除照片或设为封面。第一张为封面。</p>
+          <p class="hint" th:if="${reselectPhotos}">文字输入已保留。照片未保存，再次提交前请重新选择。</p>
+          <p class="error" id="image-error" role="alert"></p><div id="image-previews" class="image-previews" aria-label="已选图片"></div>
+          <div class="two-columns"><div class="field"><label for="conditionCode">资料成色 <em>*</em></label><select th:field="*{conditionCode}" required><option value="">请选择成色</option><option th:each="item : ${conditions}" th:value="${item.key}" th:text="${item.value}"></option></select></div><div class="field"><label for="noteLevel">笔记程度 <em>*</em></label><select th:field="*{noteLevel}" required><option value="">请选择笔记程度</option><option value="NONE">无笔记</option><option value="FEW">少量笔记</option><option value="MANY">较多笔记</option></select></div></div>
+          <div class="field"><label for="description">资料说明 <em>*</em></label><textarea th:field="*{description}" required maxlength="2000" rows="5" placeholder="如实描述内容、缺损和使用痕迹。"></textarea><span class="counter" id="description-count"></span></div>
+        </section>
+        <section class="form-section">
+          <h2><span>03</span> 适用范围</h2><p class="section-note">专业与学期成对选择。通用资料可选择“不限专业＋未定义”。</p>
+          <div id="scope-rows">
+            <div class="scope-row" th:each="scope, row : *{scopes}">
+              <label><span class="sr-only">适用专业</span><select data-scope="majorId" th:field="*{scopes[__${row.index}__].majorId}" required><option value="0">不限专业</option><option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}"></option></select></label>
+              <label><span class="sr-only">适用学期</span><select data-scope="semester" th:field="*{scopes[__${row.index}__].semester}" required><option th:each="item : ${semesters}" th:value="${item.key}" th:text="${item.value}"></option></select></label>
+              <button type="button" data-remove-scope>移除</button>
+            </div>
+          </div>
+          <button type="button" class="text-button" id="add-scope">＋ 添加一组适用范围</button><p class="error" id="scope-error" role="alert"></p>
+          <div class="field"><label for="courseName">课程或考试名称 <small>选填</small></label><input th:field="*{courseName}" maxlength="100"></div>
+          <fieldset class="tag-field"><legend>考试 / 用途标签 <small>选填，可多选</small></legend><div class="tag-options"><label th:each="tag : ${tags}"><input type="checkbox" th:field="*{tags}" th:value="${tag.id}"><span th:text="${tag.name}"></span></label><span class="hint" th:if="${tags.isEmpty()}">暂无可选标签，可直接继续填写。</span></div></fieldset>
+        </section>
+        <section class="form-section">
+          <h2><span>04</span> 流转与联系</h2>
+          <fieldset class="mode-field"><legend>流转方式 <em>*</em></legend><div class="mode-options"><label><input type="radio" th:field="*{transferType}" value="SALE"><span>出售</span></label><label><input type="radio" th:field="*{transferType}" value="GIFT"><span>免费赠送</span></label></div></fieldset>
+          <div class="field price-field"><label for="price">转让价格 <em>*</em></label><div class="price-input"><span>¥</span><input th:field="*{price}" type="number" min="0.01" max="9999.99" step="0.01" th:required="*{transferType == 'SALE'}" th:readonly="*{transferType == 'GIFT'}"></div><p class="hint" id="price-help">出售价格大于0，最多两位小数；赠送价格自动设为0。</p></div>
+          <div class="two-columns contact-fields"><div class="field"><label for="contactType">联系方式 <em>*</em></label><select th:field="*{contactType}" required><option value="">请选择</option><option value="WECHAT">微信</option><option value="QQ">QQ</option><option value="PHONE">手机号</option></select></div><div class="field"><label for="contactValue">联系账号 <em>*</em></label><input th:field="*{contactValue}" required maxlength="100" autocomplete="off"></div></div>
+          <p class="hint">已预填你的默认联系方式；在此修改不会改变个人资料。</p>
+        </section>
+        <div class="form-actions"><a th:href="@{/market}">取消并返回市场</a><button type="submit" class="primary">校验并预览 →</button></div>
+      </form>
+      <aside class="form-sidebar"><div class="guide"><h2>好资料，值得被看见。</h2><ol><li><strong>拍清楚实物</strong><p>封面、版本页和笔记情况都可以拍下来。</p></li><li><strong>如实说明成色</strong><p>缺页、划线或其他使用痕迹，请写在说明中。</p></li><li><strong>选好适用范围</strong><p>课程可以留空，通用书籍可选不限专业。</p></li></ol></div><div class="live-summary"><h3>本次流转</h3><strong id="summary-mode"></strong><p id="summary-price"></p></div></aside>
+    </div>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。</footer>
+  <script th:src="@{/js/publish-form.js}" defer></script>
+</body>
+</html>

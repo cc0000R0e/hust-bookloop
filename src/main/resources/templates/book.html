@@ -11,7 +11,7 @@
 <body>
   <header><nav class="nav" aria-label="主导航">
     <a class="brand" th:href="@{/}">HUST BookLoop</a>
-    <div class="navlinks"><a th:href="${returnTo}">教材市场</a><a th:href="@{/account}">我的账户</a></div>
+    <div class="navlinks"><a th:href="${returnTo}">教材市场</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}">＋ 发布资料</a></div>
   </nav></header>
   <main class="detail-layout">
     <nav class="breadcrumb" aria-label="当前位置"><a th:href="${returnTo}">教材市场</a><span>／</span><span aria-current="page">资料详情</span><a class="back-link" th:href="${returnTo}">← 返回市场</a></nav>

@@ -23,17 +23,21 @@ public class SecurityConfig {
         var requestCache = new org.springframework.security.web.savedrequest.HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
         requestCache.setRequestMatcher(request -> "GET".equals(request.getMethod())
-                && (request.getServletPath().equals("/account") || request.getServletPath().matches("/books/[^/]+/contact")));
+                && (request.getServletPath().equals("/account") || request.getServletPath().equals("/books/new")
+                    || request.getServletPath().matches("/books/[^/]+/contact")));
         http.requestCache(cache -> cache.requestCache(requestCache))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/books/new").authenticated()
+                .requestMatchers(HttpMethod.HEAD, "/books/new").authenticated()
+                .requestMatchers(HttpMethod.POST, "/books/preview").authenticated()
                 .requestMatchers(HttpMethod.GET, "/books/*/contact").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/books/*/contact").authenticated()
                 .requestMatchers(HttpMethod.GET, "/books/*").permitAll()
                 .requestMatchers(HttpMethod.HEAD, "/books/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/prototype/**", "/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/js/**", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                 .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
-                .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/prototype/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/js/**", "/prototype/**").permitAll()
                 .anyRequest().denyAll())
             .formLogin(login -> login.loginPage("/login")
                 .defaultSuccessUrl("/account", false).failureUrl("/login?error").permitAll())
@@ -41,7 +45,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
             .exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) -> {
-                    if (request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
+                    if (request.getServletPath().equals("/books/new") || request.getServletPath().equals("/books/preview")
+                            || request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
                             || request.getServletPath().matches("/books/[^/]+/contact")) {
                         new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);
                     } else {
