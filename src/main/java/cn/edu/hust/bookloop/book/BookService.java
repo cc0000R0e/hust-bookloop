@@ -36,12 +36,17 @@ public class BookService {
                          String category, String course, String condition, String notes, String description,
                          BigDecimal price, boolean gift, String status, boolean reserved, boolean restricted,
                          String seller, String publishedAt, List<String> scopes, List<String> tags,
-                         boolean signedIn, List<Contact> contacts, List<Photo> images) {}
+                         boolean signedIn, boolean ownedByCurrentUser, boolean canReport,
+                         List<Contact> contacts, List<Photo> images) {}
 
     public Detail find(long id, Authentication authentication) {
         var book = visibility.requireVisible(id, authentication);
         boolean signedIn = visibility.signedIn(authentication);
         boolean publicBook = visibility.isPublic(book);
+        boolean ownedByCurrentUser = signedIn && !entityManager.createQuery(
+                        "select u.id from AppUser u where u.id = :id and u.username = :name", Long.class)
+                .setParameter("id", book.getOwnerId()).setParameter("name", authentication.getName())
+                .getResultList().isEmpty();
         String seller = entityManager.createQuery("select u.username from AppUser u where u.id = :id", String.class)
                 .setParameter("id", book.getOwnerId()).getResultStream().findFirst().orElse("未填写");
         // Contact data is queried only after authentication and visibility checks.
@@ -67,7 +72,8 @@ public class BookService {
                 MarketOptions.label(MarketOptions.CONDITIONS, book.getConditionCode()),
                 MarketOptions.label(NOTES, book.getNoteLevel()), optional(book.getDescription()),
                 book.getPrice(), gift, status, "RESERVED".equals(book.getLifecycleStatus()), !publicBook,
-                seller, published, scopes, book.getTags().stream().map(BookTag::getName).sorted().toList(), signedIn, visibleContacts,
+                seller, published, scopes, book.getTags().stream().map(BookTag::getName).sorted().toList(),
+                signedIn, ownedByCurrentUser, signedIn && publicBook && !ownedByCurrentUser, visibleContacts,
                 images.findByListingIdOrderBySortOrderAsc(id).stream()
                     .map(image -> new Photo(image.getId(), "/books/" + id + "/images/" + image.getId())).toList());
     }

@@ -26,14 +26,16 @@ public class SecurityConfig {
                 && (request.getServletPath().equals("/account") || request.getServletPath().equals("/books/new")
                     || request.getServletPath().equals("/my/listings")
                     || request.getServletPath().matches("/books/[^/]+/contact")
-                    || request.getServletPath().matches("/books/[^/]+/edit")));
+                    || request.getServletPath().matches("/books/[^/]+/edit")
+                    || request.getServletPath().matches("/books/[^/]+/report")));
         http.requestCache(cache -> cache.requestCache(requestCache))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/books/new").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/books/new").authenticated()
-                .requestMatchers(HttpMethod.GET, "/my/listings", "/books/*/edit").authenticated()
+                .requestMatchers(HttpMethod.GET, "/my/listings", "/books/*/edit", "/books/*/report").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/my/listings", "/books/*/edit").authenticated()
-                .requestMatchers(HttpMethod.POST, "/books", "/books/preview", "/books/*", "/books/*/status").authenticated()
+                .requestMatchers(HttpMethod.POST, "/books", "/books/preview", "/books/*", "/books/*/status",
+                        "/books/*/reports").authenticated()
                 .requestMatchers(HttpMethod.GET, "/books/*/images/*").permitAll()
                 .requestMatchers(HttpMethod.HEAD, "/books/*/images/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/books/*/contact").authenticated()
@@ -55,7 +57,8 @@ public class SecurityConfig {
                             || request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
                             || request.getServletPath().equals("/my/listings")
                             || request.getServletPath().matches("/books/[^/]+/contact")
-                            || request.getServletPath().matches("/books/[^/]+/edit")) {
+                            || request.getServletPath().matches("/books/[^/]+/edit")
+                            || request.getServletPath().matches("/books/[^/]+/report")) {
                         new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);
                     } else {
                         new HttpStatusEntryPoint(HttpStatus.FORBIDDEN).commence(request, response, exception);

@@ -2,6 +2,7 @@ package cn.edu.hust.bookloop.web;
 
 import cn.edu.hust.bookloop.book.BookAccessException;
 import cn.edu.hust.bookloop.book.BookService;
+import cn.edu.hust.bookloop.report.ReportOptions;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class BookController {
                          Authentication authentication, Model model) {
         model.addAttribute("book", books.find(parseId(id), authentication));
         model.addAttribute("returnTo", MarketReturnUrl.safe(returnTo));
+        model.addAttribute("reportReasons", ReportOptions.REASONS);
         return "book";
     }
 

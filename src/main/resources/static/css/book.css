@@ -12,3 +12,77 @@
 .product-photo { width: 100%; height: 100%; object-fit: contain; }
 .photo-thumbnails { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
 .photo-thumbnails img { width: 100%; height: 100px; object-fit: contain; background: var(--paper); }
+
+.report-panel {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e2e6e7;
+  scroll-margin-top: 20px;
+}
+
+.report-panel h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.report-panel form {
+  display: grid;
+  gap: 9px;
+}
+
+.report-panel label {
+  color: #4d5a62;
+  font-size: 13px;
+}
+
+.report-panel select,
+.report-panel textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #ccd5d8;
+  border-radius: 5px;
+  background: #fff;
+  font: inherit;
+}
+
+.report-panel textarea {
+  resize: vertical;
+}
+
+.report-panel button {
+  justify-self: start;
+  padding: 8px 13px;
+  border: 1px solid #d7b5af;
+  border-radius: 5px;
+  color: #8d3026;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.report-success,
+.report-error {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.report-success {
+  border: 1px solid #cce2d2;
+  color: #245c35;
+  background: #f2faf4;
+}
+
+.report-error {
+  border: 1px solid #edcbc7;
+  color: #8b2e24;
+  background: #fff6f5;
+}
+
+.report-note {
+  margin: 10px 0 0;
+  color: #7a858b;
+  font-size: 12px;
+  line-height: 1.6;
+}

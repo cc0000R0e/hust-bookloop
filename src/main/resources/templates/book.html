@@ -63,6 +63,28 @@
       <aside class="seller-panel" aria-labelledby="seller-heading">
         <h2 id="seller-heading">发布者</h2><div class="seller-profile"><div class="avatar" aria-hidden="true">书</div><strong th:text="${book.seller}"></strong></div>
         <dl class="seller-facts"><div><dt>发布时间</dt><dd><span th:text="${book.publishedAt}"></span><br>北京时间</dd></div></dl>
+        <section id="report" class="report-panel"
+                 th:if="${book.canReport or (!book.signedIn and !book.restricted) or reportSuccess != null or reportError != null}"
+                 aria-labelledby="report-heading">
+          <h2 id="report-heading">举报资料</h2>
+          <p class="report-success" th:if="${reportSuccess}" th:text="${reportSuccess}" role="status"></p>
+          <p class="report-error" th:if="${reportError}" th:text="${reportError}" role="alert"></p>
+          <a th:if="${!book.signedIn and !book.restricted}"
+             th:href="@{/books/{id}/report(id=${book.id}, returnTo=${returnTo})}">登录后举报</a>
+          <form th:if="${book.canReport}" th:action="@{/books/{id}/reports(id=${book.id})}" method="post">
+            <input type="hidden" name="returnTo" th:value="${returnTo}">
+            <label for="reportReason">举报原因</label>
+            <select id="reportReason" name="reasonCode" required>
+              <option value="">请选择举报原因</option>
+              <option th:each="reason : ${reportReasons}" th:value="${reason.key}" th:text="${reason.value}"></option>
+            </select>
+            <label for="reportDescription">补充说明 <small>选填，最多500字</small></label>
+            <textarea id="reportDescription" name="description" maxlength="500" rows="3"
+                      placeholder="请说明需要管理员核实的问题。"></textarea>
+            <button type="submit">提交举报</button>
+          </form>
+          <p class="report-note" th:if="${book.canReport}">举报内容仅用于平台核查，请勿填写无关个人信息。</p>
+        </section>
       </aside>
     </div>
   </main>
