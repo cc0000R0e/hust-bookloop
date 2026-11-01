@@ -28,6 +28,8 @@ public class Listing {
     @Column(nullable = false, precision = 6, scale = 2) private BigDecimal price;
     @Column(name = "lifecycle_status", nullable = false, length = 16) private String lifecycleStatus;
     @Column(name = "admin_blocked", nullable = false) private boolean adminBlocked;
+    // DATETIME stores UTC wall time. Read directly, without java.sql.Timestamp's JVM timezone conversion.
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
     @Column(name = "published_at", nullable = false) private LocalDateTime publishedAt;
     @OneToMany(mappedBy = "listing")
     @BatchSize(size = 20)
