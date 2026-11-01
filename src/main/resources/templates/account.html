@@ -18,6 +18,10 @@ java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --se
   <p><a th:href="@{/market}">进入教材市场 →</a></p>
   <p><a th:href="@{/books/new}">填写发布资料 →</a></p>
   <p><a th:href="@{/my/listings}">管理我的发布 →</a></p>
+  <div th:if="${role == 'ADMIN'}">
+    <p><a th:href="@{/admin/reports}">处理待审举报 →</a></p>
+    <p><a th:href="@{/admin/listings}">管理资料限制 →</a></p>
+  </div>
   <p th:if="${success}" th:text="${success}" role="status"></p>
   <p th:if="${error}" th:text="${error}" role="alert"></p>
   <form class="account-form" th:action="@{/account/contact}" method="post">

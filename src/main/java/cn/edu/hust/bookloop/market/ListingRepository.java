@@ -2,6 +2,8 @@ package cn.edu.hust.bookloop.market;
 
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -12,4 +14,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select l from Listing l where l.id = :id")
     Optional<Listing> findByIdForUpdate(@Param("id") long id);
+    Page<Listing> findByAdminBlockedTrue(Pageable pageable);
 }

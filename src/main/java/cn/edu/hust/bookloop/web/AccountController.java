@@ -44,6 +44,7 @@ public class AccountController {
     public String account(Principal principal, Model model) {
         var user = users.findByUsername(principal.getName()).orElseThrow();
         model.addAttribute("username", user.getUsername());
+        model.addAttribute("role", user.getRole());
         model.addAttribute("contactType", user.getDefaultContactType());
         model.addAttribute("contactValue", user.getDefaultContactValue());
         return "account";

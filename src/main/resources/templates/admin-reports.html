@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>举报队列 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header>
+  <nav class="nav" aria-label="主导航">
+    <a class="brand" th:href="@{/}">HUST BookLoop</a>
+    <div class="navlinks">
+      <a th:href="@{/market}">教材市场</a>
+      <a class="active" th:href="@{/admin/reports}" aria-current="page">举报队列</a>
+      <a th:href="@{/admin/listings}">资料限制</a>
+      <a th:href="@{/account}">我的账户</a>
+    </div>
+  </nav>
+</header>
+<main class="admin-page">
+  <div class="admin-heading">
+    <div><p class="eyebrow">ADMIN · REPORTS</p><h1>待处理举报</h1><p>核实情况后处理或驳回，必要时下架关联资料。</p></div>
+    <span class="admin-count" th:text="${result.totalElements} + ' 条待处理'"></span>
+  </div>
+  <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status"></p>
+  <p class="admin-flash error" th:if="${error}" th:text="${error}" role="alert"></p>
+
+  <section class="report-queue" th:if="${!result.empty}">
+    <article class="report-card" th:each="report : ${result.content}">
+      <div class="report-summary">
+        <div class="report-meta">
+          <span th:text="${report.reason}"></span>
+          <span th:text="${report.createdAt}"></span>
+        </div>
+        <h2><a th:href="@{/books/{id}(id=${report.listingId})}" th:text="${report.listingTitle}"></a></h2>
+        <p class="report-description" th:text="${report.description}"></p>
+        <dl class="report-facts">
+          <div><dt>举报人</dt><dd th:text="${report.reporter}"></dd></div>
+          <div><dt>发布者</dt><dd th:text="${report.listingOwner}"></dd></div>
+          <div><dt>资料状态</dt><dd th:text="${report.listingStatus}"></dd></div>
+          <div><dt>关联编号</dt><dd th:text="'#' + ${report.listingId}"></dd></div>
+        </dl>
+        <p class="admin-restriction" th:if="${report.listingBlocked}">
+          当前限制原因：<span th:text="${report.listingAdminReason}"></span>
+        </p>
+      </div>
+      <form class="report-decision" th:action="@{/admin/reports/{id}/handle(id=${report.id})}" method="post">
+        <input type="hidden" name="expectedVersion" th:value="${report.version}">
+        <label>处理结果
+          <select name="decision" required>
+            <option value="">请选择</option>
+            <option value="RESOLVED">处理举报</option>
+            <option value="REJECTED">驳回举报</option>
+          </select>
+        </label>
+        <label>处理说明
+          <textarea name="resolutionNote" required maxlength="500" rows="3"
+                    placeholder="说明核实结论和处理结果。"></textarea>
+        </label>
+        <div th:if="${!report.listingBlocked}">
+          <label class="admin-check">
+            <input type="checkbox" name="blockListing" value="true" class="block-toggle">
+            同时下架关联资料
+          </label>
+          <label>管理员下架原因
+            <input name="adminReason" class="block-reason" maxlength="500"
+                   placeholder="选择下架时必填。">
+          </label>
+        </div>
+        <button type="submit">提交处理结果</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="admin-empty" th:if="${result.empty}">
+    <h2>没有待处理举报</h2>
+    <p>新的举报提交后会显示在这里。</p>
+  </section>
+
+  <nav class="admin-pagination" th:if="${result.totalPages > 1}" aria-label="分页">
+    <a th:if="${result.hasPrevious()}" th:href="${previousUrl}">上一页</a>
+    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}"></span>
+    <a th:if="${result.hasNext()}" th:href="${nextUrl}">下一页</a>
+  </nav>
+</main>
+<script>
+  document.querySelectorAll(".report-decision").forEach((form) => {
+    const toggle = form.querySelector(".block-toggle");
+    const reason = form.querySelector(".block-reason");
+    if (!toggle || !reason) return;
+    const sync = () => { reason.required = toggle.checked; };
+    toggle.addEventListener("change", sync);
+    sync();
+  });
+</script>
+</body>
+</html>

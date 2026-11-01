@@ -107,6 +107,28 @@ public class Listing {
         touch();
     }
 
+    public void blockByAdmin(String reason) {
+        if (adminBlocked) throw new IllegalStateException("资料已处于管理员限制状态。");
+        String normalized = reason == null ? "" : reason.strip();
+        if (normalized.isEmpty() || normalized.codePointCount(0, normalized.length()) > 500) {
+            throw new IllegalArgumentException("管理员下架原因须为1—500个字符。");
+        }
+        adminBlocked = true;
+        adminReason = normalized;
+        touch();
+    }
+
+    public void releaseByAdmin() {
+        if (!adminBlocked) throw new IllegalStateException("资料当前未受管理员限制。");
+        adminBlocked = false;
+        // Keep the most recent reason for audit display. Completed remains completed.
+        if (!"COMPLETED".equals(lifecycleStatus)) {
+            lifecycleStatus = "WITHDRAWN";
+            completedAt = null;
+        }
+        touch();
+    }
+
     public boolean isOwner(long userId) { return ownerId == userId; }
     public boolean isEditable() { return !adminBlocked && !"COMPLETED".equals(lifecycleStatus); }
 

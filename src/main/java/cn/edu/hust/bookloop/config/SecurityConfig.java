@@ -25,6 +25,7 @@ public class SecurityConfig {
         requestCache.setRequestMatcher(request -> "GET".equals(request.getMethod())
                 && (request.getServletPath().equals("/account") || request.getServletPath().equals("/books/new")
                     || request.getServletPath().equals("/my/listings")
+                    || request.getServletPath().startsWith("/admin/")
                     || request.getServletPath().matches("/books/[^/]+/contact")
                     || request.getServletPath().matches("/books/[^/]+/edit")
                     || request.getServletPath().matches("/books/[^/]+/report")));
@@ -45,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/js/**", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                 .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/js/**", "/prototype/**").permitAll()
                 .anyRequest().denyAll())
             .formLogin(login -> login.loginPage("/login")
@@ -56,6 +58,7 @@ public class SecurityConfig {
                     if (request.getServletPath().equals("/books") || request.getServletPath().equals("/books/new") || request.getServletPath().equals("/books/preview")
                             || request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
                             || request.getServletPath().equals("/my/listings")
+                            || request.getServletPath().startsWith("/admin/")
                             || request.getServletPath().matches("/books/[^/]+/contact")
                             || request.getServletPath().matches("/books/[^/]+/edit")
                             || request.getServletPath().matches("/books/[^/]+/report")) {
