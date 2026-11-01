@@ -14,6 +14,11 @@ import org.hibernate.annotations.Immutable;
 @Immutable
 public class Listing {
     @Id private Long id;
+    @Column(name = "owner_id", nullable = false) private Long ownerId;
+    @Column(length = 100) private String publisher;
+    @Column(name = "edition_note", length = 100) private String editionNote;
+    @Column(nullable = false, length = 2000) private String description;
+    @Column(name = "note_level", nullable = false, length = 16) private String noteLevel;
     @Column(nullable = false, length = 100) private String title;
     @Column(nullable = false, length = 16) private String category;
     @Column(length = 100) private String author;
@@ -34,6 +39,14 @@ public class Listing {
     private List<BookTag> tags = new ArrayList<>();
 
     protected Listing() {}
+    public Long getOwnerId() { return ownerId; }
+    public String getPublisher() { return publisher; }
+    public String getEditionNote() { return editionNote; }
+    public String getDescription() { return description; }
+    public String getNoteLevel() { return noteLevel; }
+    public String getLifecycleStatus() { return lifecycleStatus; }
+    public boolean isAdminBlocked() { return adminBlocked; }
+    public LocalDateTime getPublishedAt() { return publishedAt; }
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getCategory() { return category; }

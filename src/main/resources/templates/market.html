@@ -78,7 +78,7 @@
       </select><button class="apply-sort" type="submit" form="market-filters">确定</button></label>
     </div>
     <section class="grid" aria-label="资料列表">
-      <article class="card" th:each="book : ${result.content}" th:attr="data-id=${book.id}">
+      <a class="card" th:each="book : ${result.content}" th:attr="data-id=${book.id}" th:href="@{/books/{id}(id=${book.id},returnTo=${marketUrl})}" th:aria-label="'查看' + ${book.title}">
         <div class="cover-stage">
           <span class="condition" th:text="${book.condition}"></span>
           <div class="book minimal placeholder-cover" aria-hidden="true">
@@ -97,7 +97,7 @@
           <span class="price" th:unless="${book.gift}"><small>¥</small><span th:text="${#numbers.formatDecimal(book.price, 1, 2)}"></span></span>
           <span class="availability" th:text="${book.gift ? '待赠送' : '在售'}"></span>
         </div>
-      </article>
+      </a>
       <div class="empty" th:if="${result.empty}"><h2>暂时没有匹配的资料</h2><p>试试其他关键词，或减少筛选条件。</p><a class="apply-filter" th:href="@{/market}">清除筛选</a></div>
     </section>
     <div class="bottom">

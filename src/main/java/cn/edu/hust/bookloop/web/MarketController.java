@@ -40,6 +40,7 @@ public class MarketController {
         model.addAttribute("categories", MarketOptions.CATEGORIES);
         model.addAttribute("conditions", MarketOptions.CONDITIONS);
         model.addAttribute("username", principal == null ? null : principal.getName());
+        model.addAttribute("marketUrl", pageUrl(filter, page));
         model.addAttribute("previousUrl", pageUrl(filter, Math.max(0, page - 1)));
         model.addAttribute("nextUrl", pageUrl(filter, page + 1));
         return "market";

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${book.title} + ' · HUST BookLoop'">资料详情</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/detail.css}">
+  <link rel="stylesheet" th:href="@{/css/book.css}">
+</head>
+<body>
+  <header><nav class="nav" aria-label="主导航">
+    <a class="brand" th:href="@{/}">HUST BookLoop</a>
+    <div class="navlinks"><a th:href="${returnTo}">教材市场</a><a th:href="@{/account}">我的账户</a></div>
+  </nav></header>
+  <main class="detail-layout">
+    <nav class="breadcrumb" aria-label="当前位置"><a th:href="${returnTo}">教材市场</a><span>／</span><span aria-current="page">资料详情</span><a class="back-link" th:href="${returnTo}">← 返回市场</a></nav>
+    <p class="access-note" th:if="${book.restricted}">此资料已不公开，仅所有者和管理员可查看记录。</p>
+    <section class="product" aria-labelledby="book-title">
+      <div class="gallery">
+        <div class="large-cover placeholder-cover" aria-hidden="true">
+          <span class="condition" th:text="${book.condition}"></span>
+          <div class="book minimal"><span class="book-top">BOOKLOOP · CAMPUS LIBRARY</span><span class="book-title" th:text="${book.title}"></span><span class="book-art"></span><span class="book-foot">学习 · 阅读 · 分享</span></div>
+        </div>
+        <p class="image-caption">封面占位图，非书籍实物照片</p>
+      </div>
+      <div class="product-summary">
+        <div class="eyebrow"><span th:text="${book.category}"></span><span class="status" th:text="${book.status}"></span></div>
+        <h1 id="book-title" th:text="${book.title}"></h1>
+        <p class="byline">作者：<span th:text="${book.author}"></span></p>
+        <div class="price-panel">
+          <span class="price-label" th:text="${book.gift ? '赠送' : '售价'}"></span>
+          <strong class="detail-price" th:if="${book.gift}">免费赠送</strong>
+          <strong class="detail-price" th:unless="${book.gift}" th:text="'¥' + ${#numbers.formatDecimal(book.price, 1, 2)}"></strong>
+        </div>
+        <p class="access-note" th:if="${book.reserved}">已有意向买家，请先与发布者确认。</p>
+        <dl class="summary-facts">
+          <div><dt>版次 / 版本</dt><dd th:text="${book.edition}"></dd></div>
+          <div><dt>书籍成色</dt><dd th:text="${book.condition}"></dd></div>
+          <div><dt>笔记程度</dt><dd th:text="${book.notes}"></dd></div>
+          <div><dt>关联课程</dt><dd th:text="${book.course}"></dd></div>
+          <div><dt>考试 / 用途</dt><dd><span th:if="${book.tags.isEmpty()}">未填写</span><span class="tag" th:each="tag : ${book.tags}" th:text="${tag}"></span></dd></div>
+        </dl>
+        <div class="scope-block"><h2>适用范围</h2><div class="scope-list"><span th:if="${book.scopes.isEmpty()}">未填写</span><span class="scope-chip" th:each="scope : ${book.scopes}" th:text="${scope}"></span></div><p>由发布者填写，请结合自己的课程要求确认。</p></div>
+        <section id="contacts" class="contact-panel" aria-labelledby="contact-heading">
+          <h2 id="contact-heading">联系发布者</h2>
+          <a class="primary" th:unless="${book.signedIn}" th:href="@{/books/{id}/contact(id=${book.id},returnTo=${returnTo})}">登录后查看联系方式</a>
+          <div th:if="${book.signedIn}">
+            <p th:if="${book.contacts.isEmpty()}">发布者尚未提供此资料的联系方式。</p>
+            <dl class="summary-facts"><div th:each="contact : ${book.contacts}"><dt th:text="${contact.type}"></dt><dd th:text="${contact.value}"></dd></div></dl>
+          </div>
+          <p class="contact-note" th:text="${book.gift ? '免费领取与交接由双方自行协商。' : '付款与交接由双方自行协商。'}"></p>
+        </section>
+      </div>
+    </section>
+    <div class="lower-layout">
+      <section class="description-panel" aria-labelledby="description-heading">
+        <h2 id="description-heading">资料说明</h2><p class="book-description" th:text="${book.description}"></p>
+        <dl class="extra-facts"><div><dt>出版社</dt><dd th:text="${book.publisher}"></dd></div><div><dt>发布编号</dt><dd th:text="${book.id}"></dd></div></dl>
+      </section>
+      <aside class="seller-panel" aria-labelledby="seller-heading">
+        <h2 id="seller-heading">发布者</h2><div class="seller-profile"><div class="avatar" aria-hidden="true">书</div><strong th:text="${book.seller}"></strong></div>
+        <dl class="seller-facts"><div><dt>发布时间</dt><dd><span th:text="${book.publishedAt}"></span><br>北京时间</dd></div></dl>
+      </aside>
+    </div>
+  </main>
+  <footer>HUST BookLoop · 校园书籍，循环阅读。</footer>
+</body>
+</html>

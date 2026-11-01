@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资料不可用 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/detail.css}">
+</head>
+<body>
+  <header><nav class="nav"><a class="brand" th:href="@{/}">HUST BookLoop</a></nav></header>
+  <main class="detail-layout"><section class="missing">
+    <h1 th:text="${missing ? '没有找到这份资料' : '资料已不可获取'}"></h1>
+    <p th:text="${missing ? '资料编号无效或记录不存在，请返回市场选择其他资料。' : '此资料已完成流转、下架或被限制展示，请返回市场选择其他资料。'}"></p>
+    <a class="primary" th:href="${returnTo}">返回教材市场</a>
+  </section></main>
+</body>
+</html>

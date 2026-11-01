@@ -20,19 +20,29 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
+        var requestCache = new org.springframework.security.web.savedrequest.HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+        requestCache.setRequestMatcher(request -> "GET".equals(request.getMethod())
+                && (request.getServletPath().equals("/account") || request.getServletPath().matches("/books/[^/]+/contact")));
+        http.requestCache(cache -> cache.requestCache(requestCache))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/books/*/contact").authenticated()
+                .requestMatchers(HttpMethod.HEAD, "/books/*/contact").authenticated()
+                .requestMatchers(HttpMethod.GET, "/books/*").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/books/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                 .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/prototype/**").permitAll()
                 .anyRequest().denyAll())
             .formLogin(login -> login.loginPage("/login")
-                .defaultSuccessUrl("/account", true).failureUrl("/login?error").permitAll())
+                .defaultSuccessUrl("/account", false).failureUrl("/login?error").permitAll())
             .logout(logout -> logout.logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
             .exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) -> {
-                    if (request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")) {
+                    if (request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
+                            || request.getServletPath().matches("/books/[^/]+/contact")) {
                         new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);
                     } else {
                         new HttpStatusEntryPoint(HttpStatus.FORBIDDEN).commence(request, response, exception);

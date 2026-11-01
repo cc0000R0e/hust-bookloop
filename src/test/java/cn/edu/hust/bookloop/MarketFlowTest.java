@@ -65,9 +65,9 @@ class MarketFlowTest {
 
     private void book(long id, String title, String category, String transfer, int price, String status, boolean blocked) {
         jdbc.update("""
-                insert into listing (id, title, category, author, course_name, condition_code,
+                insert into listing (owner_id, description, note_level, id, title, category, author, course_name, condition_code,
                 transfer_type, price, lifecycle_status, admin_blocked, published_at)
-                values (?, ?, ?, 'Example Author', '算法课程', 'LIGHT_USE', ?, ?, ?, ?, '2026-01-01 00:00:00')
+                values (9001, '市场测试说明', 'NONE', ?, ?, ?, 'Example Author', '算法课程', 'LIGHT_USE', ?, ?, ?, ?, '2026-01-01 00:00:00')
                 """, id, title, category, transfer, price, status, blocked);
     }
 

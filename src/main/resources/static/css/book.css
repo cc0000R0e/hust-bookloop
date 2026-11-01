@@ -1,0 +1,10 @@
+.placeholder-cover { cursor: default; --bg: #e2e9e4; --fg: #354b40; }
+.placeholder-cover .book-title { font-size: 20px; overflow-wrap: anywhere; }
+.book-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.summary-facts dd, .product-summary h1, .extra-facts dd, .seller-profile { overflow-wrap: anywhere; }
+.scope-chip { display: inline-block; padding: 6px 9px; background: #f4f5f6; margin: 0 6px 6px 0; border-radius: 3px; }
+.access-note { padding: 12px 16px; background: #faf3e8; color: #755d35; line-height: 1.7; }
+.contact-panel { padding-top: 10px; scroll-margin-top: 20px; }
+.contact-panel h2 { font-size: 16px; margin-bottom: 18px; }
+.contact-panel .primary { display: inline-block; }
+@media (max-width: 650px) { .navlinks a { display: block; font-size: 12px; } .breadcrumb { flex-wrap: wrap; } }
