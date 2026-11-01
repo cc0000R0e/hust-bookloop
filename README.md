@@ -50,6 +50,8 @@ SERVER_PORT=8081 mvn -Dmaven.repo.local=.cache/maven spring-boot:run
 
 若数据库是旧版本创建的，`app_user`仍有必填的`nickname`列，需要先用有表结构修改权限的数据库账号执行`database/migrations/001_remove_user_nickname.sql`，再启动新版应用，否则注册可能失败。该脚本只执行一次，会删除旧昵称，保留账号、密码及用户ID。使用当前`schema.sql`新建的库无需执行。系统统一使用账号展示用户身份。
 
+资料说明现已改为选填。旧数据库还需要执行一次`database/migrations/002_optional_listing_description.sql`，把说明列改为可空；使用当前`schema.sql`新建的库无需执行。
+
 ```bash
 mvn -Dmaven.repo.local=.cache/maven spring-boot:run -Dspring-boot.run.profiles=mysql
 ```

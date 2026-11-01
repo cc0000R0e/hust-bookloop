@@ -207,8 +207,9 @@ public class OwnerListingService {
         boolean withdrawn = "WITHDRAWN".equals(listing.getLifecycleStatus());
         boolean gift = "GIFT".equals(listing.getTransferType());
         String price = gift ? "免费赠送" : "¥" + listing.getPrice().setScale(2).toPlainString();
-        return new Card(listing.getId(), listing.getTitle(),
-                MarketOptions.CATEGORIES.getOrDefault(listing.getCategory(), listing.getCategory()),
+        return new Card(listing.getId(),
+                listing.getTitle() == null || listing.getTitle().isBlank() ? "未命名资料" : listing.getTitle(),
+                MarketOptions.label(MarketOptions.CATEGORIES, listing.getCategory()),
                 displayStatus(listing), price,
                 listing.getPublishedAt().atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Shanghai"))
                         .format(DISPLAY_TIME),

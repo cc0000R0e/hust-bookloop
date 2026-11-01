@@ -351,4 +351,29 @@ class OwnerListingFlowTest {
                 "select count(*) from listing_event where listing_id = ? and action_code = 'CHANGE_TRANSFER'",
                 Long.class, id)).isEqualTo(1);
     }
+
+    @Test
+    void listingDescriptionCanBeLeftEmpty() throws Exception {
+        var form = new PublishForm();
+        form.setTitle("无说明资料");
+        form.setCategory("TEXTBOOK");
+        form.setConditionCode("LIGHT_USE");
+        form.setNoteLevel("NONE");
+        form.setTransferType("GIFT");
+        form.setContactType("WECHAT");
+        form.setContactValue("optional-fields-contact");
+        form.setPhotos(List.of(new MockMultipartFile("photos", "cover.png", "image/png", png())));
+        long id = publisher.publish(form, "owner_user");
+
+        assertThat(jdbc.queryForObject("select description from listing where id = ?", String.class, id)).isNull();
+
+        var detail = get(client(), "/books/" + id);
+        assertThat(detail.statusCode()).isEqualTo(200);
+        assertThat(detail.body()).contains("无说明资料", "未填写");
+        assertThat(get(client(), "/market").body()).contains("data-id=\"" + id + "\"", "无说明资料");
+
+        var owner = client();
+        login(owner, "owner_user");
+        assertThat(get(owner, "/my/listings").body()).contains("无说明资料");
+    }
 }

@@ -17,7 +17,7 @@ public class Listing {
     @Column(name = "owner_id", nullable = false) private Long ownerId;
     @Column(length = 100) private String publisher;
     @Column(name = "edition_note", length = 100) private String editionNote;
-    @Column(nullable = false, length = 2000) private String description;
+    @Column(length = 2000) private String description;
     @Column(name = "note_level", nullable = false, length = 16) private String noteLevel;
     @Column(nullable = false, length = 100) private String title;
     @Column(nullable = false, length = 16) private String category;
@@ -58,15 +58,15 @@ public class Listing {
     }
 
     public void apply(cn.edu.hust.bookloop.publish.PublishForm form) {
-        this.title = form.getTitle().strip();
-        this.category = form.getCategory();
+        this.title = optional(form.getTitle());
+        this.category = optional(form.getCategory());
         this.author = optional(form.getAuthor());
         this.publisher = optional(form.getPublisher());
         this.editionNote = optional(form.getEditionNote());
         this.courseName = optional(form.getCourseName());
-        this.description = form.getDescription().strip();
-        this.noteLevel = form.getNoteLevel();
-        this.conditionCode = form.getConditionCode();
+        this.description = optional(form.getDescription());
+        this.noteLevel = optional(form.getNoteLevel());
+        this.conditionCode = optional(form.getConditionCode());
         this.transferType = form.getTransferType();
         this.price = "GIFT".equals(transferType) ? BigDecimal.ZERO : form.getPrice();
         touch();

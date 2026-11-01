@@ -62,9 +62,10 @@ public class BookService {
         };
         String published = book.getPublishedAt().atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Shanghai"))
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        return new Detail(book.getId(), book.getTitle(), optional(book.getAuthor()), optional(book.getPublisher()),
-                optional(book.getEditionNote()), MarketOptions.CATEGORIES.get(book.getCategory()), optional(book.getCourseName()),
-                MarketOptions.CONDITIONS.get(book.getConditionCode()), NOTES.get(book.getNoteLevel()), book.getDescription(),
+        return new Detail(book.getId(), optionalWith(book.getTitle(), "未命名资料"), optional(book.getAuthor()), optional(book.getPublisher()),
+                optional(book.getEditionNote()), MarketOptions.label(MarketOptions.CATEGORIES, book.getCategory()), optional(book.getCourseName()),
+                MarketOptions.label(MarketOptions.CONDITIONS, book.getConditionCode()),
+                MarketOptions.label(NOTES, book.getNoteLevel()), optional(book.getDescription()),
                 book.getPrice(), gift, status, "RESERVED".equals(book.getLifecycleStatus()), !publicBook,
                 seller, published, scopes, book.getTags().stream().map(BookTag::getName).sorted().toList(), signedIn, visibleContacts,
                 images.findByListingIdOrderBySortOrderAsc(id).stream()
@@ -72,4 +73,7 @@ public class BookService {
     }
 
     private String optional(String value) { return value == null || value.isBlank() ? "未填写" : value; }
+    private String optionalWith(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
 }

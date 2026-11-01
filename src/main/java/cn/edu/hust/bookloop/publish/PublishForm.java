@@ -15,7 +15,7 @@ public class PublishForm {
     @Size(max = 100) private String publisher = "";
     @Size(max = 100) private String editionNote = "";
     @Size(max = 100) private String courseName = "";
-    @NotBlank @Size(max = 2000) private String description = "";
+    @Size(max = 2000) private String description = "";
     @NotBlank private String conditionCode = "";
     @NotBlank private String noteLevel = "";
     @NotBlank private String transferType = "SALE";

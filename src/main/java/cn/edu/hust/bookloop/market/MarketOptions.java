@@ -14,6 +14,9 @@ public final class MarketOptions {
         "TEXTBOOK", "教材", "READING", "推荐阅读书籍", "EXAM", "考试复习资料");
     public static final Map<String, String> CONDITIONS = options(
         "LIKE_NEW", "近全新", "LIGHT_USE", "少量使用痕迹", "HEAVY_USE", "明显使用痕迹");
+    public static String label(Map<String, String> options, String code) {
+        return code == null ? "未填写" : options.getOrDefault(code, "未填写");
+    }
     private static Map<String, String> options(String... pairs) {
         var result = new LinkedHashMap<String, String>();
         for (int i = 0; i < pairs.length; i += 2) result.put(pairs[i], pairs[i + 1]);

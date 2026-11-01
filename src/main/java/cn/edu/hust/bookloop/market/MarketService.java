@@ -56,9 +56,9 @@ public class MarketService {
         var covers = new java.util.HashMap<Long, String>();
         if (!entries.isEmpty()) images.findByListingIdInOrderBySortOrderAsc(entries.stream().map(Listing::getId).toList())
                 .forEach(image -> covers.putIfAbsent(image.getListingId(), "/books/" + image.getListingId() + "/images/" + image.getId()));
-        var page = entries.map(book -> new Card(book.getId(), book.getTitle(), book.getAuthor(), book.getCourseName(),
-                        MarketOptions.CATEGORIES.get(book.getCategory()),
-                        MarketOptions.CONDITIONS.get(book.getConditionCode()), book.getPrice(),
+        var page = entries.map(book -> new Card(book.getId(), displayTitle(book.getTitle()), book.getAuthor(), book.getCourseName(),
+                        MarketOptions.label(MarketOptions.CATEGORIES, book.getCategory()),
+                        MarketOptions.label(MarketOptions.CONDITIONS, book.getConditionCode()), book.getPrice(),
                         "GIFT".equals(book.getTransferType()),
                         book.getScopes().stream().map(scope ->
                             ("ALL".equals(scope.getScopeType()) ? "不限专业" : majorNames.get(scope.getMajorId()))
@@ -66,6 +66,10 @@ public class MarketService {
                             .distinct().sorted().toList(),
                         book.getTags().stream().map(BookTag::getName).sorted(Comparator.naturalOrder()).toList(), covers.get(book.getId())));
         return new Result(page, majors, tags);
+    }
+
+    private String displayTitle(String title) {
+        return title == null || title.isBlank() ? "未命名资料" : title;
     }
 
     private Specification<Listing> specification(MarketFilter filter) {

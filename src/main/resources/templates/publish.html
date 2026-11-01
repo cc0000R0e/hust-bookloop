@@ -10,7 +10,7 @@
   <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/market}">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}" th:aria-current="${mode == 'edit' ? null : 'page'}">＋ 发布资料</a></div></nav></header>
   <main class="publish-layout">
     <div class="page-title"><div><p class="eyebrow">PASS A BOOK FORWARD</p><h1 th:text="${mode == 'edit' ? '更新资料信息。' : '让闲置的书，遇见下一位读者。'}">让闲置的书，遇见下一位读者。</h1><p th:text="${mode == 'edit' ? '保存后资料内容和市场展示会同步更新。' : '填写资料信息，选择出售或免费赠送。'}">填写资料信息，选择出售或免费赠送。</p></div></div>
-    <p class="prototype-banner" th:text="${mode == 'edit' ? '当前状态：' + listingStatus + '。未重新选择照片时，保留原有实物照片。' : '填写信息并上传实物照片，发布成功后可在教材市场查看。'}">填写信息并上传实物照片，发布成功后可在教材市场查看。</p>
+    <p class="prototype-banner" th:text="${mode == 'edit' ? '当前状态：' + listingStatus + '。未重新选择照片时，保留原有实物照片。' : '资料说明可以留空；其他资料信息按标记填写。'}">资料说明可以留空；其他资料信息按标记填写。</p>
     <div class="form-layout">
       <form id="publish-form" th:object="${form}"
             th:action="${mode == 'edit'} ? @{/books/{id}(id=${editId}, _csrf=${_csrf.token})} : @{/books(_csrf=${_csrf.token})}"
@@ -43,7 +43,7 @@
           <p class="hint" th:if="${reselectPhotos}">文字输入已保留，请重新选择照片后再次提交。</p>
           <p class="error" id="image-error" role="alert"></p><div id="image-previews" class="image-previews" aria-label="已选图片"></div>
           <div class="two-columns"><div class="field"><label for="conditionCode">资料成色 <em>*</em></label><select th:field="*{conditionCode}" required><option value="">请选择成色</option><option th:each="item : ${conditions}" th:value="${item.key}" th:text="${item.value}"></option></select></div><div class="field"><label for="noteLevel">笔记程度 <em>*</em></label><select th:field="*{noteLevel}" required><option value="">请选择笔记程度</option><option value="NONE">无笔记</option><option value="FEW">少量笔记</option><option value="MANY">较多笔记</option></select></div></div>
-          <div class="field"><label for="description">资料说明 <em>*</em></label><textarea th:field="*{description}" required maxlength="2000" rows="5" placeholder="如实描述内容、缺损和使用痕迹。"></textarea><span class="counter" id="description-count"></span></div>
+          <div class="field"><label for="description">资料说明 <small>选填</small></label><textarea th:field="*{description}" maxlength="2000" rows="5" placeholder="如实描述内容、缺损和使用痕迹。"></textarea><span class="counter" id="description-count"></span></div>
         </section>
         <section class="form-section">
           <h2><span>03</span> 适用范围</h2><p class="section-note">专业与学期成对选择。通用资料可选择“不限专业＋未定义”。</p>
