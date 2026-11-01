@@ -81,7 +81,8 @@
       <a class="card" th:each="book : ${result.content}" th:attr="data-id=${book.id}" th:href="@{/books/{id}(id=${book.id},returnTo=${marketUrl})}" th:aria-label="'查看' + ${book.title}">
         <div class="cover-stage">
           <span class="condition" th:text="${book.condition}"></span>
-          <div class="book minimal placeholder-cover" aria-hidden="true">
+          <img class="market-photo" th:if="${book.coverUrl != null}" th:src="${book.coverUrl}" th:alt="${book.title} + '实物照片'" loading="lazy">
+          <div class="book minimal placeholder-cover" th:unless="${book.coverUrl != null}" aria-hidden="true">
             <span class="book-top">BOOKLOOP · CAMPUS LIBRARY</span>
             <span class="book-title" th:text="${book.title}"></span><span class="book-art"></span>
             <span class="book-foot">书籍封面占位</span>

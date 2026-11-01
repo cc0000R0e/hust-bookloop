@@ -84,7 +84,7 @@ class PublishFormTest {
         assertThat(login(c).headers().firstValue("Location").orElseThrow()).endsWith("/books/new");
         var page = get(c, "/books/new");
         assertThat(page.statusCode()).isEqualTo(200);
-        assertThat(page.body()).contains("multipart/form-data", "default-contact", "可用专业", "可用标签", "大五下", "研究生", "未定义", "尚不会保存图片或发布到市场")
+        assertThat(page.body()).contains("multipart/form-data", "default-contact", "可用专业", "可用标签", "大五下", "研究生", "未定义", "发布成功后可在教材市场查看")
             .doesNotContain("已停用专业", "已停用标签", "password_hash", "demo-state.js");
         assertThat(get(c, "/js/publish-form.js").statusCode()).isEqualTo(200);
     }

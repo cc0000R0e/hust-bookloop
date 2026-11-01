@@ -17,37 +17,33 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class BookService {
-    private final ListingRepository listings;
+    private final BookVisibility visibility;
+    private final cn.edu.hust.bookloop.image.ListingImageRepository images;
     private final ListingContactRepository contacts;
     private final EntityManager entityManager;
     private static final Map<String, String> NOTES = Map.of("NONE", "无笔记", "FEW", "少量笔记", "MANY", "较多笔记");
     private static final Map<String, String> CONTACT_TYPES = Map.of("WECHAT", "微信", "QQ", "QQ", "PHONE", "手机号");
 
-    public BookService(ListingRepository listings, ListingContactRepository contacts, EntityManager entityManager) {
-        this.listings = listings;
+    public BookService(BookVisibility visibility, cn.edu.hust.bookloop.image.ListingImageRepository images, ListingContactRepository contacts, EntityManager entityManager) {
+        this.visibility = visibility; this.images = images;
         this.contacts = contacts;
         this.entityManager = entityManager;
     }
 
+    public record Photo(Long id, String url) {}
     public record Contact(String type, String value) {}
     public record Detail(Long id, String title, String author, String publisher, String edition,
                          String category, String course, String condition, String notes, String description,
                          BigDecimal price, boolean gift, String status, boolean reserved, boolean restricted,
                          String seller, String publishedAt, List<String> scopes, List<String> tags,
-                         boolean signedIn, List<Contact> contacts) {}
+                         boolean signedIn, List<Contact> contacts, List<Photo> images) {}
 
     public Detail find(long id, Authentication authentication) {
-        var book = listings.findById(id).orElseThrow(() -> new BookAccessException(HttpStatus.NOT_FOUND));
-        boolean signedIn = authentication != null && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken);
+        var book = visibility.requireVisible(id, authentication);
+        boolean signedIn = visibility.signedIn(authentication);
+        boolean publicBook = visibility.isPublic(book);
         String seller = entityManager.createQuery("select u.username from AppUser u where u.id = :id", String.class)
                 .setParameter("id", book.getOwnerId()).getResultStream().findFirst().orElse("未填写");
-        boolean owner = signedIn && seller.equals(authentication.getName());
-        boolean admin = signedIn && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        boolean publicBook = !book.isAdminBlocked()
-                && (book.getLifecycleStatus().equals("ACTIVE") || book.getLifecycleStatus().equals("RESERVED"));
-        if (!publicBook && !owner && !admin) throw new BookAccessException(HttpStatus.GONE);
-
         // Contact data is queried only after authentication and visibility checks.
         var visibleContacts = signedIn ? contacts.findByListingIdOrderByIdAsc(id).stream()
                 .map(c -> new Contact(CONTACT_TYPES.get(c.getType()), c.getValue())).toList() : List.<Contact>of();
@@ -70,7 +66,9 @@ public class BookService {
                 optional(book.getEditionNote()), MarketOptions.CATEGORIES.get(book.getCategory()), optional(book.getCourseName()),
                 MarketOptions.CONDITIONS.get(book.getConditionCode()), NOTES.get(book.getNoteLevel()), book.getDescription(),
                 book.getPrice(), gift, status, "RESERVED".equals(book.getLifecycleStatus()), !publicBook,
-                seller, published, scopes, book.getTags().stream().map(BookTag::getName).sorted().toList(), signedIn, visibleContacts);
+                seller, published, scopes, book.getTags().stream().map(BookTag::getName).sorted().toList(), signedIn, visibleContacts,
+                images.findByListingIdOrderBySortOrderAsc(id).stream()
+                    .map(image -> new Photo(image.getId(), "/books/" + id + "/images/" + image.getId())).toList());
     }
 
     private String optional(String value) { return value == null || value.isBlank() ? "未填写" : value; }

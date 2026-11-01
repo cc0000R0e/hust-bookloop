@@ -29,7 +29,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/books/new").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/books/new").authenticated()
-                .requestMatchers(HttpMethod.POST, "/books/preview").authenticated()
+                .requestMatchers(HttpMethod.POST, "/books", "/books/preview").authenticated()
+                .requestMatchers(HttpMethod.GET, "/books/*/images/*").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/books/*/images/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/books/*/contact").authenticated()
                 .requestMatchers(HttpMethod.HEAD, "/books/*/contact").authenticated()
                 .requestMatchers(HttpMethod.GET, "/books/*").permitAll()
@@ -45,7 +47,7 @@ public class SecurityConfig {
                 .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
             .exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) -> {
-                    if (request.getServletPath().equals("/books/new") || request.getServletPath().equals("/books/preview")
+                    if (request.getServletPath().equals("/books") || request.getServletPath().equals("/books/new") || request.getServletPath().equals("/books/preview")
                             || request.getServletPath().equals("/account") || request.getServletPath().startsWith("/account/")
                             || request.getServletPath().matches("/books/[^/]+/contact")) {
                         new LoginUrlAuthenticationEntryPoint("/login").commence(request, response, exception);

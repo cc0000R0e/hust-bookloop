@@ -24,3 +24,5 @@
   .profile { font-size: 12px; }
   .bottom { flex-direction: column; gap: 20px; }
 }
+
+.market-photo { width: 100%; height: 100%; object-fit: contain; }

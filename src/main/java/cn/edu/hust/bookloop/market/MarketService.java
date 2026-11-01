@@ -21,16 +21,17 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class MarketService {
     private final ListingRepository listings;
+    private final cn.edu.hust.bookloop.image.ListingImageRepository images;
     private final EntityManager entityManager;
 
-    public MarketService(ListingRepository listings, EntityManager entityManager) {
-        this.listings = listings;
+    public MarketService(ListingRepository listings, EntityManager entityManager, cn.edu.hust.bookloop.image.ListingImageRepository images) {
+        this.listings = listings; this.images = images;
         this.entityManager = entityManager;
     }
 
     public record Option(Long id, String name) {}
     public record Card(Long id, String title, String author, String course, String category,
-                       String condition, BigDecimal price, boolean gift, List<String> scopes, List<String> tags) {}
+                       String condition, BigDecimal price, boolean gift, List<String> scopes, List<String> tags, String coverUrl) {}
     public record Result(Page<Card> page, List<Option> majors, List<Option> tags) {}
 
     public Result search(MarketFilter filter) {
@@ -51,8 +52,11 @@ public class MarketService {
         };
         // Stable ordering prevents ties from shuffling between pages.
         sort = sort.and(Sort.by("id").descending());
-        var page = listings.findAll(specification(filter), PageRequest.of(filter.page(), 20, sort))
-                .map(book -> new Card(book.getId(), book.getTitle(), book.getAuthor(), book.getCourseName(),
+        var entries = listings.findAll(specification(filter), PageRequest.of(filter.page(), 20, sort));
+        var covers = new java.util.HashMap<Long, String>();
+        if (!entries.isEmpty()) images.findByListingIdInOrderBySortOrderAsc(entries.stream().map(Listing::getId).toList())
+                .forEach(image -> covers.putIfAbsent(image.getListingId(), "/books/" + image.getListingId() + "/images/" + image.getId()));
+        var page = entries.map(book -> new Card(book.getId(), book.getTitle(), book.getAuthor(), book.getCourseName(),
                         MarketOptions.CATEGORIES.get(book.getCategory()),
                         MarketOptions.CONDITIONS.get(book.getConditionCode()), book.getPrice(),
                         "GIFT".equals(book.getTransferType()),
@@ -60,7 +64,7 @@ public class MarketService {
                             ("ALL".equals(scope.getScopeType()) ? "不限专业" : majorNames.get(scope.getMajorId()))
                             + " · " + MarketOptions.SEMESTERS.get(scope.getSemesterCode()))
                             .distinct().sorted().toList(),
-                        book.getTags().stream().map(BookTag::getName).sorted(Comparator.naturalOrder()).toList()));
+                        book.getTags().stream().map(BookTag::getName).sorted(Comparator.naturalOrder()).toList(), covers.get(book.getId())));
         return new Result(page, majors, tags);
     }
 

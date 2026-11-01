@@ -10,9 +10,9 @@
   <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/market}">教材市场</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}" aria-current="page">＋ 发布资料</a></div></nav></header>
   <main class="publish-layout">
     <div class="page-title"><div><p class="eyebrow">PASS A BOOK FORWARD</p><h1>让闲置的书，遇见下一位读者。</h1><p>填写资料信息，选择出售或免费赠送。</p></div></div>
-    <p class="prototype-banner">当前开放表单填写和提交校验；提交后显示预览，尚不会保存图片或发布到市场。</p>
+    <p class="prototype-banner">填写信息并上传实物照片，发布成功后可在教材市场查看。</p>
     <div class="form-layout">
-      <form id="publish-form" th:object="${form}" th:action="@{/books/preview(_csrf=${_csrf.token})}" method="post" enctype="multipart/form-data">
+      <form id="publish-form" th:object="${form}" th:action="@{/books(_csrf=${_csrf.token})}" method="post" enctype="multipart/form-data">
         <section th:if="${#fields.hasAnyErrors()}" class="prototype-banner" role="alert"><strong>请检查必填项、字数限制和以下提示：</strong><ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></section>
         <section th:if="${previewReady}" class="prototype-banner" role="status">
           <h2>表单校验通过，尚未发布</h2><p><strong th:text="*{title}"></strong> · <span th:text="*{transferType == 'GIFT' ? '免费赠送' : '出售'}"></span><span th:if="*{transferType == 'SALE'}" th:text="' · ¥' + *{price}"></span></p>
@@ -28,9 +28,9 @@
         <section class="form-section">
           <h2><span>02</span> 图片与使用情况</h2>
           <label class="field-label" for="photos">实物照片 <em>*</em></label>
-          <div class="upload-box"><strong>选择书籍封面、内页或使用痕迹照片</strong><p>1—6张，每张不超过5MB · JPG / PNG / WebP</p><input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required aria-describedby="image-help"></div>
+          <div class="upload-box"><strong>选择书籍封面、内页或使用痕迹照片</strong><p>1—6张，每张不超过5MB · JPG / PNG / WebP · 最大2000万像素</p><input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required aria-describedby="image-help"></div>
           <p class="hint" id="image-help">可以分批添加、删除照片或设为封面。第一张为封面。</p>
-          <p class="hint" th:if="${reselectPhotos}">文字输入已保留。照片未保存，再次提交前请重新选择。</p>
+          <p class="hint" th:if="${reselectPhotos}">文字输入已保留，请重新选择照片后再次提交。</p>
           <p class="error" id="image-error" role="alert"></p><div id="image-previews" class="image-previews" aria-label="已选图片"></div>
           <div class="two-columns"><div class="field"><label for="conditionCode">资料成色 <em>*</em></label><select th:field="*{conditionCode}" required><option value="">请选择成色</option><option th:each="item : ${conditions}" th:value="${item.key}" th:text="${item.value}"></option></select></div><div class="field"><label for="noteLevel">笔记程度 <em>*</em></label><select th:field="*{noteLevel}" required><option value="">请选择笔记程度</option><option value="NONE">无笔记</option><option value="FEW">少量笔记</option><option value="MANY">较多笔记</option></select></div></div>
           <div class="field"><label for="description">资料说明 <em>*</em></label><textarea th:field="*{description}" required maxlength="2000" rows="5" placeholder="如实描述内容、缺损和使用痕迹。"></textarea><span class="counter" id="description-count"></span></div>
@@ -55,7 +55,7 @@
           <div class="two-columns contact-fields"><div class="field"><label for="contactType">联系方式 <em>*</em></label><select th:field="*{contactType}" required><option value="">请选择</option><option value="WECHAT">微信</option><option value="QQ">QQ</option><option value="PHONE">手机号</option></select></div><div class="field"><label for="contactValue">联系账号 <em>*</em></label><input th:field="*{contactValue}" required maxlength="100" autocomplete="off"></div></div>
           <p class="hint">已预填你的默认联系方式；在此修改不会改变个人资料。</p>
         </section>
-        <div class="form-actions"><a th:href="@{/market}">取消并返回市场</a><button type="submit" class="primary">校验并预览 →</button></div>
+        <div class="form-actions"><a th:href="@{/market}">取消并返回市场</a><button type="submit" th:formaction="@{/books/preview(_csrf=${_csrf.token})}">仅校验表单</button><button type="submit" class="primary" id="publish-button">确认发布 →</button></div>
       </form>
       <aside class="form-sidebar"><div class="guide"><h2>好资料，值得被看见。</h2><ol><li><strong>拍清楚实物</strong><p>封面、版本页和笔记情况都可以拍下来。</p></li><li><strong>如实说明成色</strong><p>缺页、划线或其他使用痕迹，请写在说明中。</p></li><li><strong>选好适用范围</strong><p>课程可以留空，通用书籍可选不限专业。</p></li></ol></div><div class="live-summary"><h3>本次流转</h3><strong id="summary-mode"></strong><p id="summary-price"></p></div></aside>
     </div>

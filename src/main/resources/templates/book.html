@@ -18,11 +18,13 @@
     <p class="access-note" th:if="${book.restricted}">此资料已不公开，仅所有者和管理员可查看记录。</p>
     <section class="product" aria-labelledby="book-title">
       <div class="gallery">
-        <div class="large-cover placeholder-cover" aria-hidden="true">
+        <div class="large-cover" th:if="${!book.images.isEmpty()}"><img class="product-photo" th:src="${book.images[0].url}" th:alt="${book.title} + '实物照片'"></div>
+        <div class="photo-thumbnails" th:if="${!book.images.isEmpty()}"><a th:each="photo, index : ${book.images}" th:href="${photo.url}" target="_blank" rel="noopener" th:aria-label="'查看第' + ${index.count} + '张原图'"><img th:src="${photo.url}" th:alt="'实物照片' + ${index.count}" loading="lazy"></a></div>
+        <div class="large-cover placeholder-cover" th:if="${book.images.isEmpty()}" aria-hidden="true">
           <span class="condition" th:text="${book.condition}"></span>
           <div class="book minimal"><span class="book-top">BOOKLOOP · CAMPUS LIBRARY</span><span class="book-title" th:text="${book.title}"></span><span class="book-art"></span><span class="book-foot">学习 · 阅读 · 分享</span></div>
         </div>
-        <p class="image-caption">封面占位图，非书籍实物照片</p>
+        <p class="image-caption" th:if="${book.images.isEmpty()}">封面占位图，非书籍实物照片</p><p class="image-caption" th:unless="${book.images.isEmpty()}">发布者上传的实物照片，点击缩略图查看原图。</p>
       </div>
       <div class="product-summary">
         <div class="eyebrow"><span th:text="${book.category}"></span><span class="status" th:text="${book.status}"></span></div>

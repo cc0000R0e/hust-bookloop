@@ -27,3 +27,5 @@ server:
   error:
     include-message: never
     include-stacktrace: never
+bookloop:
+  upload-dir: ${BOOKLOOP_UPLOAD_DIR:${user.dir}/uploads}

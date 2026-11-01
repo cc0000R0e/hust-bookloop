@@ -8,12 +8,12 @@ import java.util.List;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 
-/** Read-only market projection; publishing will supply a separate write model. */
+/** Immutable after insertion; publication creates a new aggregate in a transaction. */
 @Entity
 @Table(name = "listing")
 @Immutable
 public class Listing {
-    @Id private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(name = "owner_id", nullable = false) private Long ownerId;
     @Column(length = 100) private String publisher;
     @Column(name = "edition_note", length = 100) private String editionNote;
@@ -41,6 +41,17 @@ public class Listing {
     private List<BookTag> tags = new ArrayList<>();
 
     protected Listing() {}
+    public Listing(Long ownerId, cn.edu.hust.bookloop.publish.PublishForm form) {
+        this.ownerId = ownerId;
+        this.title = form.getTitle().strip(); this.category = form.getCategory();
+        this.author = form.getAuthor(); this.publisher = form.getPublisher();
+        this.editionNote = form.getEditionNote(); this.courseName = form.getCourseName();
+        this.description = form.getDescription().strip(); this.noteLevel = form.getNoteLevel();
+        this.conditionCode = form.getConditionCode(); this.transferType = form.getTransferType();
+        this.price = "GIFT".equals(transferType) ? BigDecimal.ZERO : form.getPrice();
+        this.lifecycleStatus = "ACTIVE"; this.adminBlocked = false;
+        this.publishedAt = LocalDateTime.now(java.time.ZoneOffset.UTC);
+    }
     public Long getOwnerId() { return ownerId; }
     public String getPublisher() { return publisher; }
     public String getEditionNote() { return editionNote; }

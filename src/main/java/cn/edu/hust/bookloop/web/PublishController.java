@@ -5,6 +5,9 @@ import cn.edu.hust.bookloop.market.MarketOptions;
 import cn.edu.hust.bookloop.publish.PublishForm;
 import cn.edu.hust.bookloop.publish.PublishOptions;
 import jakarta.validation.Valid;
+import cn.edu.hust.bookloop.publish.PublishValidator;
+import cn.edu.hust.bookloop.publish.PublishService;
+import cn.edu.hust.bookloop.publish.PublishFailure;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.HashSet;
@@ -21,7 +24,30 @@ import org.springframework.web.bind.annotation.*;
 public class PublishController {
     private final UserRepository users;
     private final PublishOptions options;
-    public PublishController(UserRepository users, PublishOptions options) { this.users = users; this.options = options; }
+    private final PublishValidator validator;
+    private final PublishService publisher;
+    public PublishController(UserRepository users, PublishOptions options, PublishValidator validator, PublishService publisher) {
+        this.users = users; this.options = options; this.validator = validator; this.publisher = publisher;
+    }
+
+    @PostMapping("/books")
+    public String publish(@Valid @ModelAttribute("form") PublishForm form, BindingResult errors,
+                          Principal principal, Model model) {
+        validator.validate(form, errors);
+        if (!errors.hasErrors()) {
+            try {
+                long id = publisher.publish(form, principal.getName());
+                return "redirect:/books/" + id;
+            } catch (PublishFailure exception) {
+                errors.reject("publish", exception.getMessage());
+            } catch (org.springframework.dao.DataAccessException | org.springframework.transaction.TransactionException | jakarta.persistence.PersistenceException exception) {
+                errors.reject("publish", "保存失败，本次没有发布成功，请重新选择照片后重试。");
+            }
+        }
+        options(model);
+        model.addAttribute("reselectPhotos", true);
+        return "publish";
+    }
 
     @InitBinder("form")
     void bind(WebDataBinder binder) {
@@ -44,40 +70,8 @@ public class PublishController {
 
     @PostMapping("/books/preview")
     public String preview(@Valid @ModelAttribute("form") PublishForm form, BindingResult errors, Model model) {
-        var majors = options.majors();
-        var tags = options.tags();
-        if (!MarketOptions.CATEGORIES.containsKey(form.getCategory())) errors.rejectValue("category", "invalid", "请选择资料类别。");
-        if (!MarketOptions.CONDITIONS.containsKey(form.getConditionCode())) errors.rejectValue("conditionCode", "invalid", "请选择资料成色。");
-        if (!Set.of("NONE", "FEW", "MANY").contains(form.getNoteLevel())) errors.rejectValue("noteLevel", "invalid", "请选择笔记程度。");
-        if ("GIFT".equals(form.getTransferType())) form.setPrice(BigDecimal.ZERO);
-        else if (!"SALE".equals(form.getTransferType())) errors.rejectValue("transferType", "invalid", "请选择出售或免费赠送。");
-        else if (form.getPrice() == null || form.getPrice().signum() <= 0
-                || form.getPrice().compareTo(new BigDecimal("9999.99")) > 0 || form.getPrice().stripTrailingZeros().scale() > 2) {
-            errors.rejectValue("price", "invalid", "出售价格须大于0、不超过9999.99元，最多两位小数。");
-        }
-        if (!Set.of("WECHAT", "QQ", "PHONE").contains(form.getContactType())) errors.rejectValue("contactType", "invalid", "请选择联系方式类型。");
-        var seen = new HashSet<String>();
-        for (var scope : form.getScopes()) {
-            if (scope == null || scope.getMajorId() == null || scope.getSemester() == null
-                    || !MarketOptions.SEMESTERS.containsKey(scope.getSemester())
-                    || scope.getMajorId() != 0 && majors.stream().noneMatch(m -> m.id().equals(scope.getMajorId()))) {
-                errors.rejectValue("scopes", "invalid", "请选择有效的专业和学期，已停用的专业不可新增。");
-            } else if (!seen.add(scope.getMajorId() + ":" + scope.getSemester())) {
-                errors.rejectValue("scopes", "duplicate", "适用范围不能重复。");
-            }
-        }
-        if (!tags.stream().map(PublishOptions.Option::id).toList().containsAll(form.getTags())) {
-            errors.rejectValue("tags", "invalid", "请选择有效标签，已停用的标签不可新增。");
-        }
+        validator.validate(form, errors);
         var photos = form.getPhotos().stream().filter(p -> !p.isEmpty()).toList();
-        if (photos.isEmpty() || photos.size() > 6) errors.rejectValue("photos", "count", "请选择1—6张实物照片。");
-        for (var photo : photos) {
-            if (photo.getSize() > 5 * 1024 * 1024 || photo.getContentType() == null
-                    || !Set.of("image/jpeg", "image/png", "image/webp").contains(photo.getContentType())) {
-                errors.rejectValue("photos", "invalid", "照片须为JPG、PNG或WebP，每张不超过5MB。");
-                break;
-            }
-        }
         options(model);
         if (!errors.hasErrors()) {
             model.addAttribute("previewReady", true);
