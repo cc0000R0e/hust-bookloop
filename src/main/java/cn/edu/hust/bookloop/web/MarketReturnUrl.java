@@ -13,8 +13,9 @@ public final class MarketReturnUrl {
         if (lower.contains("%0d") || lower.contains("%0a") || lower.contains("%5c")) return "/market";
         try {
             URI uri = URI.create(value);
+            String path = uri.getRawPath();
             if (uri.isAbsolute() || uri.getRawAuthority() != null || uri.getRawFragment() != null
-                    || !"/market".equals(uri.getRawPath())) return "/market";
+                    || (!"/market".equals(path) && !"/".equals(path))) return "/market";
             return uri.toASCIIString();
         } catch (IllegalArgumentException exception) {
             return "/market";

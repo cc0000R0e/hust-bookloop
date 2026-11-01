@@ -14,12 +14,12 @@
         <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M3 6h12l3 2 3-2h12v25H21l-3 2-3-2H3z" fill="#f4eeeb"/><path d="M3 6v25h12l3 2 3-2h12V6M18 8v25" stroke="currentColor" stroke-width="2"/></svg>
         HUST BookLoop
       </a>
-      <div class="navlinks"><a class="active" th:href="@{/market}" aria-current="page">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}">＋ 发布资料</a></div>
+      <div class="navlinks"><a class="active" th:href="@{/}" aria-current="page">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}">＋ 发布资料</a></div>
     </nav>
   </header>
   <section class="search-band" aria-label="搜索资料">
     <div class="search-inner">
-      <form class="search" id="market-filters" th:action="@{/market}" method="get">
+      <form class="search" id="market-filters" th:action="${marketPath}" method="get">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg>
         <label class="sr-only" for="q">搜索书名、作者、课程或标签</label>
         <input id="q" name="q" type="search" maxlength="100" th:value="${filter.q}" placeholder="搜索书名、作者、课程或标签…">
@@ -67,7 +67,7 @@
         <label><span class="sr-only">最高价格</span><input name="maxPrice" form="market-filters" type="number" min="0" max="9999.99" step="0.01" placeholder="最高价" th:value="${filter.maxPrice}"></label>
       </div>
       <button class="apply-filter" type="submit" form="market-filters">应用筛选</button>
-      <a class="reset" th:href="@{/market}">重置筛选</a>
+      <a class="reset" th:href="${marketPath}">重置筛选</a>
     </section>
     <div class="results-bar">
       <span role="status">共 <strong th:text="${result.totalElements}">0</strong> 条可获取资料</span>
@@ -99,7 +99,7 @@
           <span class="availability" th:text="${book.gift ? '待赠送' : '在售'}"></span>
         </div>
       </a>
-      <div class="empty" th:if="${result.empty}"><h2>暂时没有匹配的资料</h2><p>试试其他关键词，或减少筛选条件。</p><a class="apply-filter" th:href="@{/market}">清除筛选</a></div>
+      <div class="empty" th:if="${result.empty}"><h2>暂时没有匹配的资料</h2><p>试试其他关键词，或减少筛选条件。</p><a class="apply-filter" th:href="${marketPath}">清除筛选</a></div>
     </section>
     <div class="bottom">
       <span>资料适用信息由发布者提供，请结合课程要求确认。</span>

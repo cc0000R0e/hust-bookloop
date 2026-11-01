@@ -28,7 +28,8 @@ class ApplicationSmokeTest {
     void rendersTemplateAndServesPrototypeAssets() throws Exception {
         var home = get("/");
         assertThat(home.statusCode()).isEqualTo(200);
-        assertThat(home.body()).contains("本地预览模式", "/prototype/index.html");
+        assertThat(home.body()).contains("教材市场", "共", "HUST BookLoop");
+        assertThat(get("/market").body()).contains("教材市场", "共");
         assertThat(get("/prototype/index.html").statusCode()).isEqualTo(200);
         assertThat(get("/prototype/js/books.js").body()).contains("const books");
         assertThat(get("/prototype/css/style.css").statusCode()).isEqualTo(200);

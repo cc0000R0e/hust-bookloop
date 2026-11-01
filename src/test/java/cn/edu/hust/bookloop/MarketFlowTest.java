@@ -104,6 +104,9 @@ class MarketFlowTest {
         assertThat(response.body()).contains("数据结构", "免费赠送", "&lt;script&gt;", "旧版六级")
                 .doesNotContain("<script>alert(1)</script>", "data-id=\"107\"", "data-id=\"110\"",
                     "books.js", "demo-state.js", "password_hash", "contact_value");
+        var root = get("/");
+        assertThat(root.statusCode()).isEqualTo(200);
+        assertThat(root.body()).contains("data-id=\"101\"", "共", "教材市场");
         assertThat(get("/css/market.css").statusCode()).isEqualTo(200);
     }
 
