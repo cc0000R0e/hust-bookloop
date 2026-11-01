@@ -12,6 +12,12 @@ public class PublishValidator {
     private final PublishOptions options;
     public PublishValidator(PublishOptions options) { this.options = options; }
     public void validate(PublishForm form, BindingResult errors) {
+        validate(form, errors, true);
+    }
+    public void validateForEdit(PublishForm form, BindingResult errors) {
+        validate(form, errors, false);
+    }
+    private void validate(PublishForm form, BindingResult errors, boolean photosRequired) {
         var majors = options.majors();
         var tags = options.tags();
         if (!MarketOptions.CATEGORIES.containsKey(form.getCategory())) errors.rejectValue("category", "invalid", "请选择资料类别。");
@@ -38,7 +44,9 @@ public class PublishValidator {
             errors.rejectValue("tags", "invalid", "请选择有效标签，已停用的标签不可新增。");
         }
         var photos = form.getPhotos().stream().filter(p -> !p.isEmpty()).toList();
-        if (photos.isEmpty() || photos.size() > 6) errors.rejectValue("photos", "count", "请选择1—6张实物照片。");
+        if ((photosRequired && photos.isEmpty()) || photos.size() > 6) {
+            errors.rejectValue("photos", "count", "请选择1—6张实物照片。");
+        }
         for (var photo : photos) {
             if (photo.getSize() > 5 * 1024 * 1024 || photo.getContentType() == null
                     || !Set.of("image/jpeg", "image/png", "image/webp").contains(photo.getContentType())) {

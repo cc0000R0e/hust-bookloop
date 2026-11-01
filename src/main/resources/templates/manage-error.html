@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>无法管理资料 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/prototype/css/account.css}">
+</head>
+<body>
+<header><nav class="nav"><a class="brand" th:href="@{/}">HUST BookLoop</a></nav></header>
+<main class="account-layout" style="text-align:center">
+  <div class="panel" style="max-width:620px;margin:60px auto">
+    <h1 th:text="${missing ? '没有找到这份资料' : '无法执行此操作'}"></h1>
+    <p th:text="${message}"></p>
+    <p><a class="primary" th:href="@{/my/listings}">返回我的发布</a></p>
+  </div>
+</main>
+</body>
+</html>

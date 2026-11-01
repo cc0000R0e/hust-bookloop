@@ -22,15 +22,15 @@
     <a class="primary" th:href="@{/login}">登录</a>
     <a class="secondary" th:href="@{/register}">注册</a>
     <a class="secondary" th:href="@{/account}">我的账户</a>
+    <a class="secondary" th:href="@{/my/listings}">我的发布</a>
     <a class="primary" th:href="@{/market}">进入教材市场</a>
     <a class="secondary" th:href="@{/books/new}">填写发布资料</a>
     <a class="secondary" th:href="@{/prototype/index.html}">查看市场原型</a>
     <a class="secondary" th:href="@{/prototype/my-listings.html}">我的发布原型</a>
     <a class="secondary" th:href="@{/prototype/admin-listings.html}">管理后台原型</a>
   </div>
-  <p>上方账户入口已接入服务端注册、密码验证和会话。标有“原型”的页面仍使用浏览器演示数据，
-    教材市场和详情已从数据库查询；资料发布、交易和管理操作尚未接入真实后端；原型演示登录不等于真实登录。</p>
-  <p>下一步：实现资料发布和图片上传。</p>
+  <p>账户、市场、详情、资料发布、图片上传和“我的发布”已接入服务端数据库；交易状态可由发布者管理。
+    标有“原型”的管理后台和举报页面仍使用浏览器演示数据。</p>
 </main>
 </body>
 </html>

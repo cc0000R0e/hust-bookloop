@@ -3,15 +3,15 @@ package cn.edu.hust.bookloop.market;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.ColumnDefault;
 
-/** Immutable after insertion; publication creates a new aggregate in a transaction. */
+/** Listing aggregate. Edits and lifecycle transitions are guarded by ownership and row version. */
 @Entity
 @Table(name = "listing")
-@Immutable
 public class Listing {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(name = "owner_id", nullable = false) private Long ownerId;
@@ -28,9 +28,18 @@ public class Listing {
     @Column(nullable = false, precision = 6, scale = 2) private BigDecimal price;
     @Column(name = "lifecycle_status", nullable = false, length = 16) private String lifecycleStatus;
     @Column(name = "admin_blocked", nullable = false) private boolean adminBlocked;
+    @Column(name = "admin_reason", length = 500) private String adminReason;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
+    @Column(name = "completed_at") private LocalDateTime completedAt;
+    @Version
+    @ColumnDefault("0")
+    @Column(name = "row_version", nullable = false) private long rowVersion;
     // DATETIME stores UTC wall time. Read directly, without java.sql.Timestamp's JVM timezone conversion.
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
     @Column(name = "published_at", nullable = false) private LocalDateTime publishedAt;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", nullable = false) private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "listing")
     @BatchSize(size = 20)
     private List<ListingScope> scopes = new ArrayList<>();
@@ -43,15 +52,74 @@ public class Listing {
     protected Listing() {}
     public Listing(Long ownerId, cn.edu.hust.bookloop.publish.PublishForm form) {
         this.ownerId = ownerId;
-        this.title = form.getTitle().strip(); this.category = form.getCategory();
-        this.author = form.getAuthor(); this.publisher = form.getPublisher();
-        this.editionNote = form.getEditionNote(); this.courseName = form.getCourseName();
-        this.description = form.getDescription().strip(); this.noteLevel = form.getNoteLevel();
-        this.conditionCode = form.getConditionCode(); this.transferType = form.getTransferType();
-        this.price = "GIFT".equals(transferType) ? BigDecimal.ZERO : form.getPrice();
+        apply(form);
         this.lifecycleStatus = "ACTIVE"; this.adminBlocked = false;
-        this.publishedAt = LocalDateTime.now(java.time.ZoneOffset.UTC);
+        this.publishedAt = this.updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
+
+    public void apply(cn.edu.hust.bookloop.publish.PublishForm form) {
+        this.title = form.getTitle().strip();
+        this.category = form.getCategory();
+        this.author = optional(form.getAuthor());
+        this.publisher = optional(form.getPublisher());
+        this.editionNote = optional(form.getEditionNote());
+        this.courseName = optional(form.getCourseName());
+        this.description = form.getDescription().strip();
+        this.noteLevel = form.getNoteLevel();
+        this.conditionCode = form.getConditionCode();
+        this.transferType = form.getTransferType();
+        this.price = "GIFT".equals(transferType) ? BigDecimal.ZERO : form.getPrice();
+        touch();
+    }
+
+    public void reserve() {
+        requireLifecycle("ACTIVE");
+        lifecycleStatus = "RESERVED";
+        touch();
+    }
+
+    public void cancelReservation() {
+        requireLifecycle("RESERVED");
+        lifecycleStatus = "ACTIVE";
+        touch();
+    }
+
+    public void complete() {
+        if (!"ACTIVE".equals(lifecycleStatus) && !"RESERVED".equals(lifecycleStatus)) {
+            throw new IllegalStateException("只有可获取或已预订的资料可以完成流转。");
+        }
+        lifecycleStatus = "COMPLETED";
+        completedAt = LocalDateTime.now(ZoneOffset.UTC);
+        touch();
+    }
+
+    public void withdraw() {
+        if (!"ACTIVE".equals(lifecycleStatus) && !"RESERVED".equals(lifecycleStatus)) {
+            throw new IllegalStateException("只有可获取或已预订的资料可以下架。");
+        }
+        lifecycleStatus = "WITHDRAWN";
+        touch();
+    }
+
+    public void relist() {
+        requireLifecycle("WITHDRAWN");
+        lifecycleStatus = "ACTIVE";
+        touch();
+    }
+
+    public boolean isOwner(long userId) { return ownerId == userId; }
+    public boolean isEditable() { return !adminBlocked && !"COMPLETED".equals(lifecycleStatus); }
+
+    private void requireLifecycle(String expected) {
+        if (!expected.equals(lifecycleStatus)) {
+            throw new IllegalStateException("当前资料状态不允许执行此操作。");
+        }
+    }
+    private void touch() { updatedAt = LocalDateTime.now(ZoneOffset.UTC); }
+    private String optional(String value) {
+        return value == null || value.isBlank() ? null : value.strip();
+    }
+
     public Long getOwnerId() { return ownerId; }
     public String getPublisher() { return publisher; }
     public String getEditionNote() { return editionNote; }
@@ -59,7 +127,11 @@ public class Listing {
     public String getNoteLevel() { return noteLevel; }
     public String getLifecycleStatus() { return lifecycleStatus; }
     public boolean isAdminBlocked() { return adminBlocked; }
+    public String getAdminReason() { return adminReason; }
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public long getRowVersion() { return rowVersion; }
     public LocalDateTime getPublishedAt() { return publishedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getCategory() { return category; }

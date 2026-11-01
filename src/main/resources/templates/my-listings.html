@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我的发布 · HUST BookLoop</title>
+  <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/account.css}">
+  <link rel="stylesheet" th:href="@{/css/owner.css}">
+</head>
+<body>
+<header>
+  <nav class="nav" aria-label="主导航">
+    <a class="brand" th:href="@{/}">HUST BookLoop</a>
+    <div class="navlinks">
+      <a th:href="@{/market}">教材市场</a>
+      <a th:href="@{/account}">我的账户</a>
+      <a class="publish" th:href="@{/books/new}">＋ 发布资料</a>
+    </div>
+  </nav>
+</header>
+<main class="owner-page">
+  <div class="owner-heading">
+    <div>
+      <p class="eyebrow">MY LISTINGS</p>
+      <h1>我的发布</h1>
+      <p>管理自己发布的资料和交易进度。</p>
+    </div>
+    <a class="primary" th:href="@{/books/new}">＋ 发布新资料</a>
+  </div>
+
+  <p class="flash success" th:if="${success}" th:text="${success}" role="status"></p>
+  <p class="flash error" th:if="${error}" th:text="${error}" role="alert"></p>
+
+  <nav class="status-tabs" aria-label="按状态筛选">
+    <a th:each="item : ${statuses}" th:href="@{/my/listings(status=${item.value})}"
+       th:text="${item.label}" th:classappend="${selectedStatus == item.value} ? ' active'">
+    </a>
+  </nav>
+
+  <section class="owner-list" th:if="${!result.empty}">
+    <article class="owner-card" th:each="listing : ${result.content}">
+      <a class="owner-cover" th:href="@{/books/{id}(id=${listing.id})}" tabindex="-1" aria-hidden="true">
+        <img th:if="${listing.coverUrl != null}" th:src="${listing.coverUrl}" alt="">
+        <span th:unless="${listing.coverUrl != null}">BOOK<br>LOOP</span>
+      </a>
+      <div class="owner-content">
+        <div class="owner-meta">
+          <span th:text="${listing.category}"></span>
+          <span class="owner-status" th:text="${listing.status}"></span>
+        </div>
+        <h2><a th:href="@{/books/{id}(id=${listing.id})}" th:text="${listing.title}"></a></h2>
+        <p class="owner-facts"><strong th:text="${listing.price}"></strong><span th:text="'发布于 ' + ${listing.publishedAt}"></span></p>
+        <p class="owner-note" th:if="${listing.restricted}">该资料已被管理员限制，发布者不能自行恢复。</p>
+      </div>
+      <div class="owner-actions">
+        <a class="action-link" th:if="${listing.editable}"
+           th:href="@{/books/{id}/edit(id=${listing.id})}">编辑</a>
+        <form th:if="${listing.canReserve}" th:action="@{/books/{id}/status(id=${listing.id})}" method="post">
+          <input type="hidden" name="action" value="reserve">
+          <input type="hidden" name="expectedVersion" th:value="${listing.version}">
+          <button type="submit">标记已预订</button>
+        </form>
+        <form th:if="${listing.canCancel}" th:action="@{/books/{id}/status(id=${listing.id})}" method="post">
+          <input type="hidden" name="action" value="cancel">
+          <input type="hidden" name="expectedVersion" th:value="${listing.version}">
+          <button type="submit">取消预订</button>
+        </form>
+        <form th:if="${listing.canComplete}" th:action="@{/books/{id}/status(id=${listing.id})}" method="post"
+              onsubmit="return confirm('确认已完成线下交接？该操作不可撤销。');">
+          <input type="hidden" name="action" value="complete">
+          <input type="hidden" name="expectedVersion" th:value="${listing.version}">
+          <button type="submit" class="danger">标记完成</button>
+        </form>
+        <form th:if="${listing.canWithdraw}" th:action="@{/books/{id}/status(id=${listing.id})}" method="post">
+          <input type="hidden" name="action" value="withdraw">
+          <input type="hidden" name="expectedVersion" th:value="${listing.version}">
+          <button type="submit">下架</button>
+        </form>
+        <form th:if="${listing.canRelist}" th:action="@{/books/{id}/status(id=${listing.id})}" method="post">
+          <input type="hidden" name="action" value="relist">
+          <input type="hidden" name="expectedVersion" th:value="${listing.version}">
+          <button type="submit" class="relist">重新上架</button>
+        </form>
+      </div>
+    </article>
+  </section>
+
+  <section class="owner-empty" th:if="${result.empty}">
+    <h2>这个状态下还没有资料</h2>
+    <p>可以切换其他状态，或发布一份资料。</p>
+    <a class="primary" th:href="@{/books/new}">发布资料</a>
+  </section>
+
+  <nav class="pagination" th:if="${result.totalPages > 1}" aria-label="分页">
+    <a th:if="${result.hasPrevious()}" th:href="${previousUrl}" rel="prev">上一页</a>
+    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}"></span>
+    <a th:if="${result.hasNext()}" th:href="${nextUrl}" rel="next">下一页</a>
+  </nav>
+</main>
+<footer>HUST BookLoop · 校园书籍，循环阅读。</footer>
+</body>
+</html>
