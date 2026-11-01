@@ -55,6 +55,9 @@
            th:text="${error}" role="alert"></p>
         <p class="owner-facts"><strong th:text="${listing.price}"></strong><span th:text="'发布于 ' + ${listing.publishedAt}"></span></p>
         <p class="owner-note" th:if="${listing.restricted}">该资料已被管理员限制，发布者不能自行恢复。</p>
+        <p class="owner-note" th:if="${listing.restricted}">下架原因：<span
+            style="white-space: pre-wrap; overflow-wrap: anywhere"
+            th:text="${#strings.isEmpty(#strings.trim(listing.adminReason)) ? '未填写' : listing.adminReason}"></span></p>
       </div>
       <div class="owner-actions">
         <a class="action-link" th:if="${listing.editable}"

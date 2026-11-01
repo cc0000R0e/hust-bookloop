@@ -59,7 +59,7 @@ public class OwnerListingService {
 
     public record Photo(Long id, String url) {}
     public record Card(long id, String title, String category, String status, String price,
-                       String publishedAt, String coverUrl, long version, boolean restricted,
+                       String publishedAt, String coverUrl, long version, boolean restricted, String adminReason,
                        boolean editable, boolean canReserve, boolean canCancel, boolean canComplete,
                        boolean canWithdraw, boolean canRelist) {}
     public record EditData(PublishForm form, List<Photo> photos, long expectedVersion, String status) {}
@@ -72,11 +72,12 @@ public class OwnerListingService {
         var user = user(username);
         Specification<Listing> spec = (root, query, cb) -> {
             var predicate = cb.equal(root.get("ownerId"), user.getId());
+            if ("all".equals(filter)) return predicate;
             if ("blocked".equals(filter)) {
                 return cb.and(predicate, cb.isTrue(root.get("adminBlocked")));
             }
             predicate = cb.and(predicate, cb.isFalse(root.get("adminBlocked")));
-            return "all".equals(filter) ? predicate : cb.and(predicate, cb.equal(root.get("lifecycleStatus"), switch (filter) {
+            return cb.and(predicate, cb.equal(root.get("lifecycleStatus"), switch (filter) {
                 case "active" -> "ACTIVE";
                 case "reserved" -> "RESERVED";
                 case "completed" -> "COMPLETED";
@@ -213,7 +214,8 @@ public class OwnerListingService {
                 displayStatus(listing), price,
                 listing.getPublishedAt().atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.of("Asia/Shanghai"))
                         .format(DISPLAY_TIME),
-                cover, listing.getRowVersion(), listing.isAdminBlocked(), listing.isEditable(),
+                cover, listing.getRowVersion(), listing.isAdminBlocked(),
+                listing.isAdminBlocked() ? listing.getAdminReason() : null, listing.isEditable(),
                 active && !listing.isAdminBlocked(), reserved && !listing.isAdminBlocked(),
                 (active || reserved) && !listing.isAdminBlocked(),
                 (active || reserved) && !listing.isAdminBlocked(),

@@ -353,6 +353,34 @@ class OwnerListingFlowTest {
     }
 
     @Test
+    void allIncludesRestrictedListingsAndShowsEscapedReasonOnlyToOwner() throws Exception {
+        long blockedId = publish();
+        long activeId = publish();
+        jdbc.update("update listing set title = ?, admin_blocked = true, admin_reason = ? where id = ?",
+                "受限教材", "封面不符\n<script>alert(1)</script>", blockedId);
+        var owner = client();
+        login(owner, "owner_user");
+        for (String path : List.of("/my/listings", "/my/listings?status=all", "/my/listings?status=blocked")) {
+            var response = get(owner, path);
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.body()).contains("受限教材", "下架原因：", "封面不符",
+                            "&lt;script&gt;alert(1)&lt;/script&gt;")
+                    .doesNotContain("<script>alert(1)</script>", "/books/" + blockedId + "/edit");
+        }
+        assertThat(get(owner, "/my/listings").body()).contains("待管理教材");
+        assertThat(get(owner, "/my/listings?status=blocked").body()).doesNotContain("待管理教材");
+        assertThat(get(owner, "/my/listings?status=active").body())
+                .contains("待管理教材").doesNotContain("受限教材", "封面不符");
+        jdbc.update("update listing set admin_reason = null where id = ?", blockedId);
+        assertThat(get(owner, "/my/listings?status=blocked").body()).contains("未填写");
+        var other = client();
+        login(other, "other_user");
+        assertThat(get(other, "/my/listings").body()).doesNotContain("受限教材", "待管理教材");
+        assertThat(get(client(), "/books/" + blockedId).statusCode()).isEqualTo(410);
+        assertThat(get(client(), "/books/" + activeId).statusCode()).isEqualTo(200);
+    }
+
+    @Test
     void listingDescriptionCanBeLeftEmpty() throws Exception {
         var form = new PublishForm();
         form.setTitle("无说明资料");
