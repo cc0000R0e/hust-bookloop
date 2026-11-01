@@ -26,8 +26,10 @@ public class Report {
     @Column(name = "resolution_note", length = 500)
     private String resolutionNote;
     @Column(name = "created_at", nullable = false)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
     private LocalDateTime createdAt;
     @Column(name = "handled_at")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.LOCAL_DATE_TIME)
     private LocalDateTime handledAt;
     @Version
     @ColumnDefault("0")

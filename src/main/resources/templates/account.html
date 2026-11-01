@@ -21,6 +21,8 @@ java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --se
   <div th:if="${role == 'ADMIN'}">
     <p><a th:href="@{/admin/reports}">处理待审举报 →</a></p>
     <p><a th:href="@{/admin/listings}">管理资料限制 →</a></p>
+    <p><a th:href="@{/admin/options/majors}">管理专业 →</a> · <a th:href="@{/admin/options/tags}">管理标签 →</a></p>
+    <p><a th:href="@{/admin/reports/history}">举报处理历史 →</a> · <a th:href="@{/admin/events}">操作日志 →</a></p>
   </div>
   <p th:if="${success}" th:text="${success}" role="status"></p>
   <p th:if="${error}" th:text="${error}" role="alert"></p>

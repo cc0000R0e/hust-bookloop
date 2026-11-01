@@ -10,40 +10,73 @@
 <body>
 <header>
   <nav class="nav" aria-label="主导航">
-    <a class="brand" th:href="@{/}">HUST BookLoop</a>
-    <div class="navlinks">
-      <a th:href="@{/}">教材市场</a>
-      <a class="active" th:href="@{/admin/reports}" aria-current="page">举报队列</a>
-      <a th:href="@{/admin/listings}">资料限制</a>
-      <a th:href="@{/account}">我的账户</a>
-    </div>
-  </nav>
+<a class="brand" th:href="@{/}">HUST BookLoop</a>
+<div class="navlinks">
+<a th:href="@{/admin/reports}">举报队列</a>
+<a th:href="@{/admin/reports/history}">处理历史</a>
+<a th:href="@{/admin/events}">操作日志</a>
+<a th:href="@{/admin/options/majors}">专业管理</a>
+<a th:href="@{/admin/options/tags}">标签管理</a>
+<a th:href="@{/admin/listings}">资料限制</a>
+<a th:href="@{/account}">我的账户</a>
+</div>
+</nav>
 </header>
 <main class="admin-page">
   <div class="admin-heading">
-    <div><p class="eyebrow">ADMIN · REPORTS</p><h1>待处理举报</h1><p>核实情况后处理或驳回，提交后统一由管理员下架关联资料。</p></div>
-    <span class="admin-count" th:text="${result.totalElements} + ' 条待处理'"></span>
+    <div>
+<p class="eyebrow">ADMIN · REPORTS</p>
+<h1>待处理举报</h1>
+<p>核实情况后处理或驳回，提交后统一由管理员下架关联资料。</p>
+</div>
+    <span class="admin-count" th:text="${result.totalElements} + ' 条待处理'">
+</span>
   </div>
-  <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status"></p>
-  <p class="admin-flash error" th:if="${error}" th:text="${error}" role="alert"></p>
+  <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status">
+</p>
+  <p class="admin-flash error" th:if="${error}" th:text="${error}" role="alert">
+</p>
 
   <section class="report-queue" th:if="${!result.empty}">
     <article class="report-card" th:each="report : ${result.content}">
       <div class="report-summary">
         <div class="report-meta">
-          <span th:text="${report.reason}"></span>
-          <span th:text="${report.createdAt}"></span>
+          <span th:text="${report.reason}">
+</span>
+          <span th:text="${report.createdAt}">
+</span>
         </div>
-        <h2><a th:href="@{/books/{id}(id=${report.listingId})}" th:text="${report.listingTitle}"></a></h2>
-        <p class="report-description" th:text="${report.description}"></p>
+        <h2>
+<a th:href="@{/books/{id}(id=${report.listingId})}" th:text="${report.listingTitle}">
+</a>
+</h2>
+        <p class="report-description" th:text="${report.description}">
+</p>
         <dl class="report-facts">
-          <div><dt>举报人</dt><dd th:text="${report.reporter}"></dd></div>
-          <div><dt>发布者</dt><dd th:text="${report.listingOwner}"></dd></div>
-          <div><dt>资料状态</dt><dd th:text="${report.listingStatus}"></dd></div>
-          <div><dt>关联编号</dt><dd th:text="'#' + ${report.listingId}"></dd></div>
+          <div>
+<dt>举报人</dt>
+<dd th:text="${report.reporter}">
+</dd>
+</div>
+          <div>
+<dt>发布者</dt>
+<dd th:text="${report.listingOwner}">
+</dd>
+</div>
+          <div>
+<dt>资料状态</dt>
+<dd th:text="${report.listingStatus}">
+</dd>
+</div>
+          <div>
+<dt>关联编号</dt>
+<dd th:text="'#' + ${report.listingId}">
+</dd>
+</div>
         </dl>
         <p class="admin-restriction" th:if="${report.listingBlocked}">
-          当前限制原因：<span th:text="${report.listingAdminReason}"></span>
+          当前限制原因：<span th:text="${report.listingAdminReason}">
+</span>
         </p>
       </div>
       <form class="report-decision" th:action="@{/admin/reports/{id}/handle(id=${report.id})}" method="post">
@@ -57,7 +90,8 @@
         </label>
         <label>处理理由
           <textarea name="reason" required maxlength="500" rows="3"
-                    placeholder="填写核实结论；该理由同时用于管理员下架。"></textarea>
+                    placeholder="填写核实结论；该理由同时用于管理员下架。">
+</textarea>
         </label>
         <p class="report-panel-note">提交后无论处理或驳回，关联资料都会由管理员下架。</p>
         <button type="submit">提交处理结果</button>
@@ -72,7 +106,8 @@
 
   <nav class="admin-pagination" th:if="${result.totalPages > 1}" aria-label="分页">
     <a th:if="${result.hasPrevious()}" th:href="${previousUrl}">上一页</a>
-    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}"></span>
+    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}">
+</span>
     <a th:if="${result.hasNext()}" th:href="${nextUrl}">下一页</a>
   </nav>
 </main>

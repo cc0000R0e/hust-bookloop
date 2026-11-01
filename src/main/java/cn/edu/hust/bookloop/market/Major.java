@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Immutable;
 
 @Entity
-@Table(name = "major")
+@Table(name = "major", uniqueConstraints = @UniqueConstraint(name = "uk_major_name", columnNames = "name"))
 @Immutable
 public class Major {
-    @Id private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(nullable = false, length = 40) private String name;
     @Column(nullable = false) private boolean enabled;
     protected Major() {}

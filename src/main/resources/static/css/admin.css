@@ -223,3 +223,9 @@
     flex-direction: column;
   }
 }
+
+.admin-record { padding: 20px; margin: 18px 0; border: 1px solid #dde4e5; border-radius: 9px; background: #fff; }
+.option-form { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+.option-form input:not([type=checkbox]), .option-form select { padding: 9px; border: 1px solid #cbd4d5; border-radius: 5px; max-width: 100%; }
+.admin-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.navlinks { flex-wrap: wrap; }

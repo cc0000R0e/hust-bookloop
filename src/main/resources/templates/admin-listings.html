@@ -10,36 +10,62 @@
 <body>
 <header>
   <nav class="nav" aria-label="主导航">
-    <a class="brand" th:href="@{/}">HUST BookLoop</a>
-    <div class="navlinks">
-      <a th:href="@{/}">教材市场</a>
-      <a th:href="@{/admin/reports}">举报队列</a>
-      <a class="active" th:href="@{/admin/listings}" aria-current="page">资料限制</a>
-      <a th:href="@{/account}">我的账户</a>
-    </div>
-  </nav>
+<a class="brand" th:href="@{/}">HUST BookLoop</a>
+<div class="navlinks">
+<a th:href="@{/admin/reports}">举报队列</a>
+<a th:href="@{/admin/reports/history}">处理历史</a>
+<a th:href="@{/admin/events}">操作日志</a>
+<a th:href="@{/admin/options/majors}">专业管理</a>
+<a th:href="@{/admin/options/tags}">标签管理</a>
+<a th:href="@{/admin/listings}">资料限制</a>
+<a th:href="@{/account}">我的账户</a>
+</div>
+</nav>
 </header>
 <main class="admin-page">
   <div class="admin-heading">
-    <div><p class="eyebrow">ADMIN · LISTINGS</p><h1>资料限制管理</h1><p>管理员下架不会被发布者自行撤销；解除限制后由发布者决定是否重新上架。</p></div>
+    <div>
+<p class="eyebrow">ADMIN · LISTINGS</p>
+<h1>资料限制管理</h1>
+<p>管理员下架不会被发布者自行撤销；解除限制后由发布者决定是否重新上架。</p>
+</div>
   </div>
-  <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status"></p>
-  <p class="admin-flash error" th:if="${error}" th:text="${error}" role="alert"></p>
+  <p class="admin-flash success" th:if="${success}" th:text="${success}" role="status">
+</p>
+  <p class="admin-flash error" th:if="${error}" th:text="${error}" role="alert">
+</p>
 
   <section class="admin-table-wrap" th:if="${!result.empty}">
     <table class="admin-table">
-      <thead><tr><th>资料</th><th>发布者</th><th>状态 / 流转</th><th>管理员操作</th></tr></thead>
+      <thead>
+<tr>
+<th>资料</th>
+<th>发布者</th>
+<th>状态 / 流转</th>
+<th>管理员操作</th>
+</tr>
+</thead>
       <tbody>
       <tr th:each="listing : ${result.content}">
         <td>
-          <a th:href="@{/books/{id}(id=${listing.id})}" th:text="${listing.title}"></a>
-          <small th:text="'#' + ${listing.id}"></small>
+          <a th:href="@{/books/{id}(id=${listing.id})}" th:text="${listing.title}">
+</a>
+          <small th:text="'#' + ${listing.id}">
+</small>
           <p class="admin-restriction" th:if="${listing.blocked}">
-            原因：<span th:text="${listing.adminReason}"></span>
+            原因：<span th:text="${listing.adminReason}">
+</span>
           </p>
         </td>
-        <td th:text="${listing.owner}"></td>
-        <td><span th:text="${listing.status}"></span><br><small th:text="${listing.transfer}"></small></td>
+        <td th:text="${listing.owner}">
+</td>
+        <td>
+<span th:text="${listing.status}">
+</span>
+<br>
+<small th:text="${listing.transfer}">
+</small>
+</td>
         <td>
           <form th:if="${listing.blocked}" th:action="@{/admin/listings/{id}/release(id=${listing.id})}" method="post">
             <input type="hidden" name="expectedVersion" th:value="${listing.version}">
@@ -63,7 +89,8 @@
 
   <nav class="admin-pagination" th:if="${result.totalPages > 1}" aria-label="分页">
     <a th:if="${result.hasPrevious()}" th:href="${previousUrl}">上一页</a>
-    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}"></span>
+    <span th:text="${result.number + 1} + ' / ' + ${result.totalPages}">
+</span>
     <a th:if="${result.hasNext()}" th:href="${nextUrl}">下一页</a>
   </nav>
 </main>

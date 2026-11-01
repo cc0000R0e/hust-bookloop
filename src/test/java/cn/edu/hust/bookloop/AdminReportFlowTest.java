@@ -35,6 +35,8 @@ class AdminReportFlowTest {
     @Autowired PasswordEncoder encoder;
     @Autowired ReportService reportService;
     @Autowired AdminService adminService;
+    @Autowired cn.edu.hust.bookloop.admin.AdminCatalogService catalog;
+    @Autowired cn.edu.hust.bookloop.publish.PublishOptions publishOptions;
 
     @BeforeEach
     void seed() {
@@ -56,6 +58,10 @@ class AdminReportFlowTest {
     void clear() {
         jdbc.update("delete from report");
         jdbc.update("delete from listing_event");
+        jdbc.update("delete from listing_tag");
+        jdbc.update("delete from listing_scope");
+        jdbc.update("delete from tag");
+        jdbc.update("delete from major");
         jdbc.update("delete from listing where id between 601 and 603");
         jdbc.update("delete from app_user where id between 9701 and 9704");
     }
@@ -111,6 +117,94 @@ class AdminReportFlowTest {
                 "password", "testpass123",
                 "_csrf", csrf(get(client, "/login").body())));
         assertThat(response.statusCode()).isEqualTo(302);
+    }
+
+    @Test
+    void catalogCanCreateRenameDisableAndRetainHistoricalLinks() throws Exception {
+        var admin = client();
+        login(admin, "the_admin");
+        for (String kind : List.of("majors", "tags")) {
+            String path = "/admin/options/" + kind;
+            String table = kind.equals("majors") ? "major" : "tag";
+            var page = get(admin, path);
+            assertThat(page.statusCode()).isEqualTo(200);
+            String token = csrf(page.body());
+            var created = post(admin, path, Map.of("name", "测试选项", "enabled", "true", "_csrf", token));
+            assertThat(created.statusCode()).isEqualTo(302);
+            assertThat(get(admin, location(created)).body()).contains("选项已保存");
+            long id = jdbc.queryForObject("select id from " + table + " where name = '测试选项'", Long.class);
+            if (kind.equals("majors")) {
+                jdbc.update("insert into listing_scope (listing_id, scope_type, major_id, semester_code) values (601, 'SPECIFIC', ?, 'Y1_S1')", id);
+            } else {
+                jdbc.update("insert into listing_tag (listing_id, tag_id) values (601, ?)", id);
+            }
+            var disabled = post(admin, path, Map.of("id", Long.toString(id), "name", "停用选项", "_csrf", token));
+            assertThat(disabled.statusCode()).isEqualTo(302);
+            assertThat(get(admin, location(disabled)).body()).contains("选项已保存");
+            assertThat(jdbc.queryForObject("select enabled from " + table + " where id = ?", Boolean.class, id)).isFalse();
+            assertThat(get(admin, path).body()).contains("停用选项", "已停用");
+            assertThat(kind.equals("majors") ? publishOptions.majors() : publishOptions.tags()).isEmpty();
+            assertThat(get(client(), "/books/601").body()).contains("停用选项");
+            var duplicate = post(admin, path, Map.of("name", "停用选项", "_csrf", token));
+            assertThat(duplicate.statusCode()).isEqualTo(302);
+            assertThat(get(admin, location(duplicate)).body()).contains("名称已存在");
+            var restored = post(admin, path, Map.of("id", Long.toString(id), "name", "<b>恢复选项</b>", "enabled", "true", "_csrf", token));
+            assertThat(get(admin, location(restored)).body()).contains("选项已保存");
+            assertThat(kind.equals("majors") ? publishOptions.majors() : publishOptions.tags()).hasSize(1);
+            assertThat(get(admin, path).body()).contains("&lt;b&gt;恢复选项&lt;/b&gt;").doesNotContain("<b>恢复选项</b>");
+            assertThat(post(admin, path, Map.of("name", "无令牌选项")).statusCode()).isEqualTo(403);
+        }
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> catalog.save("the_admin", "majors", null, "不限专业", true))
+                .isInstanceOf(cn.edu.hust.bookloop.admin.AdminFailure.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> catalog.save("the_admin", "tags", null, " ", true))
+                .isInstanceOf(cn.edu.hust.bookloop.admin.AdminFailure.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> catalog.save("the_admin", "tags", null, "长".repeat(31), true))
+                .isInstanceOf(cn.edu.hust.bookloop.admin.AdminFailure.class);
+    }
+
+    @Test
+    void historyAndEventsShowDecisionsEscapedReasonsAndBeijingTimes() throws Exception {
+        reportService.submit(601, "OTHER", "需要核实", "admin_reporter");
+        long resolved = reportId();
+        adminService.handleReport(resolved, "RESOLVED", "<script>处理说明</script>", 0, "the_admin");
+        reportService.submit(603, "OTHER", "另一条举报", "admin_reporter");
+        long rejected = jdbc.queryForObject("select id from report where listing_id = 603", Long.class);
+        adminService.handleReport(rejected, "REJECTED", "驳回理由", 0, "the_admin");
+        jdbc.update("update report set handled_at = ? where id = ?", LocalDateTime.of(2026, 11, 1, 1, 30), resolved);
+        var admin = client();
+        login(admin, "the_admin");
+        var history = get(admin, "/admin/reports/history");
+        assertThat(history.statusCode()).isEqualTo(200);
+        assertThat(history.body()).contains("已处理", "已驳回", "the_admin", "2026-11-01 09:30", "&lt;script&gt;处理说明&lt;/script&gt;")
+                .doesNotContain("<script>处理说明</script>");
+        assertThat(get(admin, "/admin/reports/history?status=RESOLVED").body()).contains("待审核资料").doesNotContain("驳回测试资料");
+        assertThat(get(admin, "/admin/reports/history?status=REJECTED").body()).contains("驳回测试资料").doesNotContain("待审核资料");
+        var events = get(admin, "/admin/events?listingId=601");
+        assertThat(events.statusCode()).isEqualTo(200);
+        assertThat(events.body()).contains("管理员下架", "the_admin", "变更前", "&lt;script&gt;处理说明&lt;/script&gt;")
+                .doesNotContain("驳回测试资料", "<script>处理说明</script>");
+        assertThat(get(admin, "/admin/events?listingId=99999").body()).contains("没有符合条件的操作日志");
+        assertThat(get(admin, "/admin/events?listingId=-1").statusCode()).isEqualTo(400);
+        assertThat(get(admin, "/admin/reports/history?status=INVALID").statusCode()).isEqualTo(400);
+        for (int i = 0; i < 21; i++) {
+            jdbc.update("insert into listing_event (listing_id, actor_id, actor_role, action_code, after_snapshot, created_at) values (601, 9704, 'ADMIN', 'ADMIN_RELEASE', '{}', CURRENT_TIMESTAMP)");
+        }
+        assertThat(catalog.events("the_admin", 601L, 0).getContent()).hasSize(20);
+        assertThat(catalog.events("the_admin", 601L, 1).getContent()).hasSize(2);
+        assertThat(get(admin, "/admin/events?listingId=601").body()).contains("listingId=601", "page=1");
+    }
+
+    @Test
+    void catalogAndHistoryRequireAdministrator() throws Exception {
+        var normal = client();
+        login(normal, "admin_normal");
+        for (String path : List.of("/admin/options/majors", "/admin/options/tags", "/admin/reports/history", "/admin/events")) {
+            assertThat(get(client(), path).statusCode()).isEqualTo(302);
+            assertThat(get(normal, path).statusCode()).isEqualTo(403);
+        }
+        assertThat(post(normal, "/admin/options/tags", Map.of("name", "非法新增", "_csrf", csrf(get(normal, "/account").body()))).statusCode()).isEqualTo(403);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> catalog.save("admin_normal", "tags", null, "非法新增", true))
+                .isInstanceOf(cn.edu.hust.bookloop.admin.AdminFailure.class);
     }
 
     private String location(HttpResponse<String> response) {

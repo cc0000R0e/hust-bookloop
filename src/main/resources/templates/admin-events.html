@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>资料操作日志 · HUST BookLoop</title>
+<link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header>
+<nav class="nav" aria-label="主导航">
+<a class="brand" th:href="@{/}">HUST BookLoop</a>
+<div class="navlinks">
+<a th:href="@{/admin/reports}">举报队列</a>
+<a th:href="@{/admin/reports/history}">处理历史</a>
+<a th:href="@{/admin/events}">操作日志</a>
+<a th:href="@{/admin/options/majors}">专业管理</a>
+<a th:href="@{/admin/options/tags}">标签管理</a>
+<a th:href="@{/admin/listings}">资料限制</a>
+<a th:href="@{/account}">我的账户</a>
+</div>
+</nav>
+</header>
+<main class="admin-page">
+<div class="admin-heading">
+<div>
+<h1>资料操作日志</h1>
+<p>记录发布、交易状态变更、出售／赠送方式变更及管理员限制操作。时间均为北京时间。</p>
+</div>
+</div>
+<form class="option-form" th:action="@{/admin/events}" method="get">
+<label>资料编号<input type="number" name="listingId" min="1" th:value="${listingId}" placeholder="留空查询全部">
+</label>
+<button type="submit">查询</button>
+</form>
+<article class="admin-record" th:each="event : ${result.content}">
+<h2>
+<a th:href="@{/books/{id}(id=${event.listingId})}" th:text="${event.title}">
+</a>
+</h2>
+<p>
+<strong th:text="${event.action}">
+</strong> · <span th:text="${event.createdAt}">
+</span>
+</p>
+<p>资料编号：<span th:text="${event.listingId}">
+</span> · 操作人：<span th:text="${event.actor}">
+</span>（<span th:text="${event.role == 'ADMIN' ? '管理员' : '普通用户'}">
+</span>）</p>
+<p class="admin-text" th:if="${event.reason != null}">操作原因：<span th:text="${event.reason}">
+</span>
+</p>
+<details>
+<summary>查看变更前后记录</summary>
+<p>变更前</p>
+<pre class="admin-text" th:text="${event.before == null ? '无' : event.before}">
+</pre>
+<p>变更后</p>
+<pre class="admin-text" th:text="${event.after}">
+</pre>
+</details>
+</article>
+<p class="admin-empty" th:if="${result.empty}">没有符合条件的操作日志。</p>
+<nav class="admin-pagination" aria-label="分页" th:if="${result.totalPages > 1}">
+<a th:if="${result.hasPrevious()}" th:href="@{/admin/events(listingId=${listingId},page=${result.number - 1})}">上一页</a>
+<span th:text="${result.number + 1} + ' / ' + ${result.totalPages}">
+</span>
+<a th:if="${result.hasNext()}" th:href="@{/admin/events(listingId=${listingId},page=${result.number + 1})}">下一页</a>
+</nav>
+</main>
+</body>
+</html>

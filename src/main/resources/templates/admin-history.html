@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>举报处理历史 · HUST BookLoop</title>
+<link rel="stylesheet" th:href="@{/prototype/css/style.css}">
+<link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header>
+<nav class="nav" aria-label="主导航">
+<a class="brand" th:href="@{/}">HUST BookLoop</a>
+<div class="navlinks">
+<a th:href="@{/admin/reports}">举报队列</a>
+<a th:href="@{/admin/reports/history}">处理历史</a>
+<a th:href="@{/admin/events}">操作日志</a>
+<a th:href="@{/admin/options/majors}">专业管理</a>
+<a th:href="@{/admin/options/tags}">标签管理</a>
+<a th:href="@{/admin/listings}">资料限制</a>
+<a th:href="@{/account}">我的账户</a>
+</div>
+</nav>
+</header>
+<main class="admin-page">
+<div class="admin-heading">
+<div>
+<h1>举报处理历史</h1>
+<p>查看已处理和已驳回举报的处理人、时间与理由。时间均为北京时间。</p>
+</div>
+</div>
+<form class="option-form" th:action="@{/admin/reports/history}" method="get">
+<label>处理结果<select name="status">
+<option value="all" th:selected="${status == 'all'}">全部</option>
+<option value="RESOLVED" th:selected="${status == 'RESOLVED'}">已处理</option>
+<option value="REJECTED" th:selected="${status == 'REJECTED'}">已驳回</option>
+</select>
+</label>
+<button type="submit">筛选</button>
+</form>
+<article class="admin-record" th:each="report : ${result.content}">
+<h2>
+<a th:href="@{/books/{id}(id=${report.listingId})}" th:text="${report.title}">
+</a>
+</h2>
+<p>
+<span th:text="'举报 #' + ${report.id}">
+</span> · <strong th:text="${report.status}">
+</strong>
+</p>
+<p>举报人：<span th:text="${report.reporter}">
+</span> · 举报时间：<span th:text="${report.createdAt}">
+</span>
+</p>
+<p>举报原因：<span th:text="${report.reason}">
+</span>
+</p>
+<p class="admin-text" th:text="${report.description}">
+</p>
+<p>处理人：<span th:text="${report.handler}">
+</span> · 处理时间：<span th:text="${report.handledAt}">
+</span>
+</p>
+<p class="admin-text">处理理由：<span th:text="${report.resolution}">
+</span>
+</p>
+<a th:href="@{/admin/events(listingId=${report.listingId})}">查看关联资料操作日志</a>
+</article>
+<p class="admin-empty" th:if="${result.empty}">没有符合条件的处理记录。</p>
+<nav class="admin-pagination" aria-label="分页" th:if="${result.totalPages > 1}">
+<a th:if="${result.hasPrevious()}" th:href="@{/admin/reports/history(status=${status},page=${result.number - 1})}">上一页</a>
+<span th:text="${result.number + 1} + ' / ' + ${result.totalPages}">
+</span>
+<a th:if="${result.hasNext()}" th:href="@{/admin/reports/history(status=${status},page=${result.number + 1})}">下一页</a>
+</nav>
+</main>
+</body>
+</html>
