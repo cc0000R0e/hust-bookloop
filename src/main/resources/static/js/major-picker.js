@@ -61,9 +61,32 @@
       select.value = selected;
       hint.textContent = matches.length ? `找到 ${matches.length} 个专业，请在下方选择。` : '没有匹配专业；可清空搜索，或暂不填写。';
     }
-    search.addEventListener('input', render);
+    search.addEventListener('input', () => {
+      // A new search starts across all colleges, not inside the previous filter.
+      const query = search.value.trim().toLocaleLowerCase();
+      const matches = query ? options.filter(option => option.value !== '' && option.value !== '0'
+        && `${option.text} ${option.colleges.join(' ')}`.toLocaleLowerCase().includes(query)) : [];
+      const colleges = new Set(matches.flatMap(option => option.colleges));
+      college.value = colleges.size === 1 && matches.every(option => option.colleges.length > 0)
+        ? colleges.values().next().value : '';
+      render();
+    });
     search.addEventListener('keydown', event => { if (event.key === 'Enter') event.preventDefault(); });
-    college.addEventListener('change', render);
+    college.addEventListener('change', () => {
+      // Explicit college selection replaces, rather than intersects, the search.
+      search.value = '';
+      render();
+    });
+    select.addEventListener('change', () => {
+      const current = options.find(option => option.value === select.value);
+      search.value = '';
+      if (current?.colleges.length === 1) {
+        college.value = current.colleges[0];
+      } else if (!current?.colleges.includes(college.value)) {
+        college.value = '';
+      }
+      render();
+    });
     render();
   }
   window.MajorPicker = {
