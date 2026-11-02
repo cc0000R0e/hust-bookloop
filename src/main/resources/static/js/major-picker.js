@@ -1,5 +1,6 @@
 (() => {
   const sources = new WeakMap();
+  let pickerId = 0;
   function enhance(select) {
     if (sources.has(select)) return;
     const options = Array.from(select.options, option => ({
@@ -23,7 +24,62 @@
     const hint = document.createElement('span');
     hint.className = 'major-picker-hint';
     hint.setAttribute('role', 'status');
-    controls.append(search, college, hint);
+    const suggestions = document.createElement('span');
+    suggestions.className = 'major-picker-suggestions';
+    suggestions.id = `major-suggestions-${++pickerId}`;
+    suggestions.setAttribute('role', 'listbox');
+    suggestions.setAttribute('aria-label', '匹配的专业');
+    suggestions.hidden = true;
+    search.setAttribute('role', 'combobox');
+    search.setAttribute('aria-autocomplete', 'list');
+    search.setAttribute('aria-controls', suggestions.id);
+    search.setAttribute('aria-expanded', 'false');
+    search.autocomplete = 'off';
+    let candidates = [];
+    let activeIndex = -1;
+    function closeSuggestions() {
+      suggestions.hidden = true;
+      search.setAttribute('aria-expanded', 'false');
+      search.removeAttribute('aria-activedescendant');
+      activeIndex = -1;
+    }
+    function choose(option) {
+      select.value = option.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      hint.textContent = `已选择：${option.text}`;
+      closeSuggestions();
+    }
+    function showSuggestions() {
+      const query = search.value.trim().toLocaleLowerCase();
+      if (!query) { closeSuggestions(); return; }
+      candidates = options.filter(option => option.value !== '' && option.value !== '0'
+        && (!college.value || option.colleges.includes(college.value))
+        && `${option.text} ${option.colleges.join(' ')}`.toLocaleLowerCase().includes(query));
+      suggestions.replaceChildren();
+      activeIndex = -1;
+      search.removeAttribute('aria-activedescendant');
+      candidates.forEach((option, index) => {
+        const item = document.createElement('span');
+        item.className = 'major-picker-suggestion';
+        item.id = `${suggestions.id}-${index}`;
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', 'false');
+        const name = document.createElement('span');
+        name.textContent = option.text;
+        const detail = document.createElement('small');
+        detail.textContent = option.colleges.join(' / ') || '未分组';
+        item.append(name, detail);
+        item.addEventListener('pointerdown', event => event.preventDefault());
+        item.addEventListener('click', event => {
+          event.preventDefault();
+          choose(option);
+        });
+        suggestions.append(item);
+      });
+      suggestions.hidden = candidates.length === 0;
+      search.setAttribute('aria-expanded', String(candidates.length > 0));
+    }
+    controls.append(search, suggestions, college, hint);
     select.before(controls);
     select.setAttribute('aria-label', '选择专业');
     function render() {
@@ -61,7 +117,7 @@
       select.value = selected;
       hint.textContent = matches.length ? `找到 ${matches.length} 个专业，请在下方选择。` : '没有匹配专业；可清空搜索，或暂不填写。';
     }
-    search.addEventListener('input', () => {
+    function searchChanged() {
       // A new search starts across all colleges, not inside the previous filter.
       const query = search.value.trim().toLocaleLowerCase();
       const matches = query ? options.filter(option => option.value !== '' && option.value !== '0'
@@ -70,16 +126,42 @@
       college.value = colleges.size === 1 && matches.every(option => option.colleges.length > 0)
         ? colleges.values().next().value : '';
       render();
+      showSuggestions();
+    }
+    search.addEventListener('input', event => { if (!event.isComposing) searchChanged(); });
+    search.addEventListener('compositionstart', closeSuggestions);
+    search.addEventListener('compositionend', searchChanged);
+    search.addEventListener('focus', showSuggestions);
+    search.addEventListener('blur', closeSuggestions);
+    search.addEventListener('keydown', event => {
+      if (event.isComposing || event.keyCode === 229) return;
+      if (event.key === 'Escape') { event.preventDefault(); closeSuggestions(); return; }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (!suggestions.hidden && candidates.length) choose(candidates[Math.max(0, activeIndex)]);
+        return;
+      }
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      event.preventDefault();
+      if (suggestions.hidden) showSuggestions();
+      if (!candidates.length || suggestions.hidden) return;
+      activeIndex = activeIndex < 0 ? (event.key === 'ArrowDown' ? 0 : candidates.length - 1)
+        : (activeIndex + (event.key === 'ArrowDown' ? 1 : -1) + candidates.length) % candidates.length;
+      Array.from(suggestions.children).forEach((item, index) => item.setAttribute('aria-selected', String(index === activeIndex)));
+      const active = suggestions.children[activeIndex];
+      search.setAttribute('aria-activedescendant', active.id);
+      active.scrollIntoView({ block: 'nearest' });
     });
-    search.addEventListener('keydown', event => { if (event.key === 'Enter') event.preventDefault(); });
     college.addEventListener('change', () => {
       // Explicit college selection replaces, rather than intersects, the search.
       search.value = '';
+      closeSuggestions();
       render();
     });
     select.addEventListener('change', () => {
       const current = options.find(option => option.value === select.value);
       search.value = '';
+      closeSuggestions();
       if (current?.colleges.length === 1) {
         college.value = current.colleges[0];
       } else if (!current?.colleges.includes(college.value)) {
