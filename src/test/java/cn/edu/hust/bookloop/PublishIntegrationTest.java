@@ -188,4 +188,20 @@ class PublishIntegrationTest {
         var cleaned=storage.prepare(new MockMultipartFile("photos","photo.png","image/png",appended.toByteArray()));
         assertThat(new String(cleaned.bytes(),StandardCharsets.ISO_8859_1)).doesNotContain("<script>");
     }
+
+    @Test
+    void publishesMultipleCollegeScopesAndRejectsMismatchedCollege() throws Exception {
+        jdbc.update("update major set colleges = '甲学院|乙学院' where id = 91");
+        var f = form();
+        var first = new PublishForm.Scope(); first.setCollege("甲学院");
+        var second = new PublishForm.Scope(); second.setCollege("乙学院");
+        f.setScopes(List.of(first, second));
+        long id = publisher.publish(f, "real_owner");
+        assertThat(jdbc.queryForObject("select count(*) from listing_scope where listing_id = ? and scope_type = 'COLLEGE' and major_id is null", Long.class, id)).isEqualTo(2L);
+        var invalid = form();
+        invalid.getScopes().getFirst().setCollege("无效学院");
+        assertThatThrownBy(() -> publisher.publish(invalid, "real_owner")).isInstanceOf(PublishFailure.class);
+        var duplicate = form(); duplicate.setScopes(List.of(first, first));
+        assertThatThrownBy(() -> publisher.publish(duplicate, "real_owner")).isInstanceOf(PublishFailure.class);
+    }
 }

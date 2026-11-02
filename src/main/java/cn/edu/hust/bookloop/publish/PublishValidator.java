@@ -36,7 +36,11 @@ public class PublishValidator {
                     || !MarketOptions.SEMESTERS.containsKey(scope.getSemester())
                     || scope.getMajorId() != 0 && majors.stream().noneMatch(m -> m.id().equals(scope.getMajorId()))) {
                 errors.rejectValue("scopes", "invalid", "请选择有效的专业和学期，已停用的专业不可新增。");
-            } else if (!seen.add(scope.getMajorId() + ":" + scope.getSemester())) {
+            } else if (!scope.getCollege().isEmpty() && (scope.getCollege().length() > 100 || majors.stream().noneMatch(m ->
+                    (scope.getMajorId() == 0 || m.id().equals(scope.getMajorId()))
+                    && cn.edu.hust.bookloop.market.CollegeNames.split(m.colleges()).contains(scope.getCollege())))) {
+                errors.rejectValue("scopes", "invalid", "请选择有效学院，专业必须属于所选学院。");
+            } else if (!seen.add(scope.getMajorId() + ":" + (scope.getMajorId() == 0 ? scope.getCollege() : "") + ":" + scope.getSemester())) {
                 errors.rejectValue("scopes", "duplicate", "适用范围不能重复。");
             }
         }

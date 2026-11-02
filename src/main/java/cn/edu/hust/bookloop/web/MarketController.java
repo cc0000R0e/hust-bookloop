@@ -22,6 +22,7 @@ public class MarketController {
     @GetMapping({"/", "/market"})
     public String market(@RequestParam(defaultValue = "") String q,
                          @RequestParam(required = false) Long major,
+                         @RequestParam(defaultValue = "") String college,
                          @RequestParam(defaultValue = "") String semester,
                          @RequestParam(defaultValue = "") String category,
                          @RequestParam(required = false) List<Long> tags,
@@ -32,7 +33,7 @@ public class MarketController {
                          @RequestParam(defaultValue = "new") String sort,
                          @RequestParam(defaultValue = "0") int page,
                          Principal principal, HttpServletRequest request, Model model) {
-        var filter = new MarketFilter(q, major, semester, category, tags, mode, minPrice, maxPrice, condition, sort, page);
+        var filter = new MarketFilter(q, major, semester, category, tags, mode, minPrice, maxPrice, condition, sort, page, college);
         var result = market.search(filter);
         String marketPath = "/".equals(request.getServletPath()) ? "/" : "/market";
         model.addAttribute("filter", filter);
@@ -43,10 +44,13 @@ public class MarketController {
         model.addAttribute("categories", MarketOptions.CATEGORIES);
         model.addAttribute("conditions", MarketOptions.CONDITIONS);
         model.addAttribute("username", principal == null ? null : principal.getName());
-        Long personalMajor = principal == null ? null : users.findByUsername(principal.getName()).map(u -> u.getMajorId()).orElse(null);
+        var personal = principal == null ? null : users.findByUsername(principal.getName()).orElse(null);
+        Long personalMajor = personal == null ? null : personal.getMajorId();
+        String personalCollege = personal == null ? "" : personal.getCollege();
         model.addAttribute("personalMajor", personalMajor);
-        if (personalMajor != null) {
-            var personalFilter = new MarketFilter(q, personalMajor, semester, category, tags, mode, minPrice, maxPrice, condition, sort, 0);
+        model.addAttribute("hasPersonalScope", personalMajor != null || !personalCollege.isEmpty());
+        if (personalMajor != null || !personalCollege.isEmpty()) {
+            var personalFilter = new MarketFilter(q, personalMajor, semester, category, tags, mode, minPrice, maxPrice, condition, sort, 0, personalCollege);
             model.addAttribute("personalMajorUrl", pageUrl(personalFilter, 0, marketPath));
         }
         model.addAttribute("marketPath", marketPath);
@@ -61,6 +65,7 @@ public class MarketController {
                 .queryParam("q", filter.q()).queryParam("semester", filter.semester())
                 .queryParam("category", filter.category()).queryParam("mode", filter.mode())
                 .queryParam("condition", filter.condition()).queryParam("sort", filter.sort()).queryParam("page", page);
+        if (!filter.college().isEmpty()) url.queryParam("college", filter.college());
         if (filter.major() != null) url.queryParam("major", filter.major());
         if (filter.minPrice() != null) url.queryParam("minPrice", filter.minPrice());
         if (filter.maxPrice() != null) url.queryParam("maxPrice", filter.maxPrice());

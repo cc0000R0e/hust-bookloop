@@ -23,13 +23,20 @@ public class AccountService {
 
     @Transactional
     public void register(String username, String password, String confirmation, Long majorId) {
+        register(username, password, confirmation, majorId, "");
+    }
+
+    @Transactional
+    public void register(String username, String password, String confirmation, Long majorId, String college) {
         username = normalize(username);
         if (!username.matches("[a-z0-9_]{4,20}")) throw new IllegalArgumentException("账号应为4—20位字母、数字或下划线。");
         validatePassword(password, confirmation);
         if (users.existsByUsername(username)) throw new IllegalArgumentException("此账号已被使用，请更换账号。");
         validateMajor(majorId);
+        college = validateCollege(majorId, college);
         var user = new AppUser(username, encoder.encode(password));
         user.setMajorId(majorId);
+        user.setCollege(college);
         users.saveAndFlush(user);
     }
 
@@ -42,10 +49,29 @@ public class AccountService {
 
     @Transactional
     public void updateMajor(String username, Long majorId) {
+        updateMajor(username, majorId, "");
+    }
+
+    @Transactional
+    public void updateMajor(String username, Long majorId, String college) {
         var user = users.findByUsername(username).orElseThrow();
-        if (java.util.Objects.equals(user.getMajorId(), majorId)) return;
+        college = cn.edu.hust.bookloop.market.CollegeNames.normalize(college);
+        if (java.util.Objects.equals(user.getMajorId(), majorId) && user.getCollege().equals(college)) return;
         validateMajor(majorId);
+        college = validateCollege(majorId, college);
         user.setMajorId(majorId);
+        user.setCollege(college);
+    }
+
+    private String validateCollege(Long majorId, String value) {
+        String college = cn.edu.hust.bookloop.market.CollegeNames.normalize(value);
+        if (college.isEmpty()) return college;
+        var rows = majorId == null
+                ? jdbc.queryForList("select colleges from major where enabled = true", String.class)
+                : jdbc.queryForList("select colleges from major where id = ? and enabled = true", String.class, majorId);
+        if (college.length() > 100 || rows.stream().noneMatch(c -> cn.edu.hust.bookloop.market.CollegeNames.split(c).contains(college)))
+            throw new IllegalArgumentException("请选择有效学院，专业必须属于所选学院。");
+        return college;
     }
 
     private void validatePassword(String password, String confirmation) {

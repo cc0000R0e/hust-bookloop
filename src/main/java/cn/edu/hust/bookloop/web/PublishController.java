@@ -53,7 +53,7 @@ public class PublishController {
     void bind(WebDataBinder binder) {
         binder.setAllowedFields("title", "category", "author", "publisher", "editionNote", "courseName", "description",
                 "conditionCode", "noteLevel", "transferType", "price", "contactType", "contactValue", "scopes[*].majorId",
-                "scopes[*].semester", "tags", "photos");
+                "scopes[*].semester", "scopes[*].college", "tags", "photos");
         binder.setAutoGrowCollectionLimit(50);
     }
 
@@ -65,6 +65,11 @@ public class PublishController {
         form.setContactValue(user.getDefaultContactValue() == null ? "" : user.getDefaultContactValue());
         if (user.getMajorId() != null && options.majors().stream().anyMatch(m -> m.id().equals(user.getMajorId()))) {
             form.getScopes().getFirst().setMajorId(user.getMajorId());
+        }
+        if (!user.getCollege().isEmpty() && options.majors().stream().anyMatch(m ->
+                (form.getScopes().getFirst().getMajorId() == 0 || m.id().equals(form.getScopes().getFirst().getMajorId()))
+                && cn.edu.hust.bookloop.market.CollegeNames.split(m.colleges()).contains(user.getCollege()))) {
+            form.getScopes().getFirst().setCollege(user.getCollege());
         }
         model.addAttribute("form", form);
         options(model);

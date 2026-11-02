@@ -27,6 +27,9 @@ public class PublishForm {
     private List<MultipartFile> photos = new ArrayList<>();
 
     public static class Scope {
+        @Size(max = 100) private String college = "";
+        public String getCollege() { return college; }
+        public void setCollege(String value) { college = cn.edu.hust.bookloop.market.CollegeNames.normalize(value); }
         @NotNull @Min(0) private Long majorId = 0L;
         @NotBlank private String semester = "UNDEFINED";
         public Long getMajorId() { return majorId; }

@@ -8,8 +8,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 public record MarketFilter(String q, Long major, String semester, String category, List<Long> tags,
                            String mode, BigDecimal minPrice, BigDecimal maxPrice, String condition,
-                           String sort, int page) {
+                           String sort, int page, String college) {
+    public MarketFilter(String q, Long major, String semester, String category, List<Long> tags,
+                        String mode, BigDecimal minPrice, BigDecimal maxPrice, String condition, String sort, int page) {
+        this(q, major, semester, category, tags, mode, minPrice, maxPrice, condition, sort, page, "");
+    }
     public MarketFilter {
+        college = CollegeNames.normalize(college);
+        if (college.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "学院无效");
         q = q == null ? "" : q.strip();
         tags = tags == null ? List.of() : tags.stream().distinct().toList();
         if (q.length() > 100 || major != null && major < 0 || page < 0 || page > 100000

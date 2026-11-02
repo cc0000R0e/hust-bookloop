@@ -9,21 +9,30 @@
       colleges: (option.dataset.colleges || '').split('|').filter(Boolean)
     }));
     sources.set(select, options);
+    const collegeValue = select.parentElement.querySelector('.college-value');
+    const empty = options.find(option => option.value === '' || option.value === '0');
+    select.hidden = true;
+    select.required = false;
     const controls = document.createElement('span');
     controls.className = 'major-picker-tools';
     const search = document.createElement('input');
     search.type = 'search';
-    search.placeholder = '搜索专业或学院，如：计算机';
-    search.setAttribute('aria-label', '搜索专业或学院');
+    search.placeholder = '搜索学院或专业；专业可不选';
+    search.setAttribute('aria-label', '搜索学院或专业');
+    search.autocomplete = 'off';
     const college = document.createElement('select');
-    college.setAttribute('aria-label', '按学院筛选专业');
-    college.add(new Option('所有学院', ''));
-    Array.from(new Set(options.flatMap(option => option.colleges))).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+    college.setAttribute('aria-label', '选择学院（专业可不选）');
+    college.add(new Option('未选学院 / 不限学院', ''));
+    const names = new Set(options.flatMap(option => option.colleges));
+    if (collegeValue.value) names.add(collegeValue.value);
+    Array.from(names).sort((a, b) => a.localeCompare(b, 'zh-CN'))
       .forEach(name => college.add(new Option(name, name)));
-    college.hidden = college.options.length === 1;
+    college.value = collegeValue.value;
     const hint = document.createElement('span');
     hint.className = 'major-picker-hint';
     hint.setAttribute('role', 'status');
+    const selectedText = document.createElement('span');
+    selectedText.className = 'major-picker-selected';
     const suggestions = document.createElement('span');
     suggestions.className = 'major-picker-suggestions';
     suggestions.id = `major-suggestions-${++pickerId}`;
@@ -34,7 +43,6 @@
     search.setAttribute('aria-autocomplete', 'list');
     search.setAttribute('aria-controls', suggestions.id);
     search.setAttribute('aria-expanded', 'false');
-    search.autocomplete = 'off';
     let candidates = [];
     let activeIndex = -1;
     function closeSuggestions() {
@@ -43,11 +51,26 @@
       search.removeAttribute('aria-activedescendant');
       activeIndex = -1;
     }
+    function render() {
+      collegeValue.value = college.value;
+      const current = options.find(option => option.value === select.value && option.value !== '' && option.value !== '0');
+      selectedText.textContent = current ? `已选专业：${current.text}`
+        : college.value ? `已选学院：${college.value}（未指定专业）` : empty.text;
+      hint.textContent = current ? '可清除专业，仅保留学院。' : '可以只选学院；专业通过搜索建议选择。';
+    }
+    function changed() {
+      render();
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      collegeValue.dispatchEvent(new Event('change', { bubbles: true }));
+    }
     function choose(option) {
       select.value = option.value;
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-      hint.textContent = `已选择：${option.text}`;
+      if (!option.colleges.includes(college.value)) {
+        college.value = option.colleges.length === 1 ? option.colleges[0] : '';
+      }
+      search.value = '';
       closeSuggestions();
+      changed();
     }
     function showSuggestions() {
       const query = search.value.trim().toLocaleLowerCase();
@@ -70,62 +93,38 @@
         detail.textContent = option.colleges.join(' / ') || '未分组';
         item.append(name, detail);
         item.addEventListener('pointerdown', event => event.preventDefault());
-        item.addEventListener('click', event => {
-          event.preventDefault();
-          choose(option);
-        });
+        item.addEventListener('click', event => { event.preventDefault(); choose(option); });
         suggestions.append(item);
       });
       suggestions.hidden = candidates.length === 0;
       search.setAttribute('aria-expanded', String(candidates.length > 0));
+      hint.textContent = candidates.length ? '点击专业可精确选择；不选专业则保留上方学院。' : '没有匹配结果，请换个关键词或直接选择学院。';
     }
-    controls.append(search, suggestions, college, hint);
+    const actions = document.createElement('span');
+    actions.className = 'major-picker-actions';
+    const action = (text, handler) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = text;
+      button.addEventListener('click', event => { event.preventDefault(); handler(); search.value = ''; closeSuggestions(); changed(); });
+      actions.append(button);
+    };
+    action('清除专业', () => { select.value = empty.value; });
+    action('清空选择', () => { select.value = empty.value; college.value = ''; });
+    if (empty.value === '' && options.some(option => option.value === '0')) {
+      action('仅看不限专业', () => { select.value = '0'; college.value = ''; });
+    }
+    controls.append(search, suggestions, college, selectedText, actions, hint);
     select.before(controls);
-    select.setAttribute('aria-label', '选择专业');
-    function render() {
-      const selected = select.value;
-      const query = search.value.trim().toLocaleLowerCase();
-      const fixed = options.filter(option => option.value === '' || option.value === '0');
-      const matches = options.filter(option => option.value !== '' && option.value !== '0'
-        && (!college.value || option.colleges.includes(college.value))
-        && `${option.text} ${option.colleges.join(' ')}`.toLocaleLowerCase().includes(query));
-      select.replaceChildren();
-      const add = (target, option) => {
-        const element = new Option(option.text, option.value, false, option.value === selected);
-        element.dataset.colleges = option.colleges.join('|');
-        target.append(element);
-      };
-      fixed.forEach(option => add(select, option));
-      const groups = new Map();
-      matches.forEach(option => {
-        const label = college.value || option.colleges.join(' / ') || '其他专业';
-        if (!groups.has(label)) {
-          const group = document.createElement('optgroup');
-          group.label = label;
-          groups.set(label, group);
-          select.append(group);
-        }
-        add(groups.get(label), option);
-      });
-      const current = options.find(option => option.value === selected);
-      if (current && !fixed.includes(current) && !matches.includes(current)) {
-        const group = document.createElement('optgroup');
-        group.label = '当前已选（保留至你选择其他专业）';
-        add(group, current);
-        select.append(group);
-      }
-      select.value = selected;
-      hint.textContent = matches.length ? `找到 ${matches.length} 个专业，请在下方选择。` : '没有匹配专业；可清空搜索，或暂不填写。';
-    }
     function searchChanged() {
-      // A new search starts across all colleges, not inside the previous filter.
       const query = search.value.trim().toLocaleLowerCase();
       const matches = query ? options.filter(option => option.value !== '' && option.value !== '0'
         && `${option.text} ${option.colleges.join(' ')}`.toLocaleLowerCase().includes(query)) : [];
       const colleges = new Set(matches.flatMap(option => option.colleges));
       college.value = colleges.size === 1 && matches.every(option => option.colleges.length > 0)
         ? colleges.values().next().value : '';
-      render();
+      select.value = empty.value;
+      changed();
       showSuggestions();
     }
     search.addEventListener('input', event => { if (!event.isComposing) searchChanged(); });
@@ -153,21 +152,10 @@
       active.scrollIntoView({ block: 'nearest' });
     });
     college.addEventListener('change', () => {
-      // Explicit college selection replaces, rather than intersects, the search.
       search.value = '';
+      select.value = empty.value;
       closeSuggestions();
-      render();
-    });
-    select.addEventListener('change', () => {
-      const current = options.find(option => option.value === select.value);
-      search.value = '';
-      closeSuggestions();
-      if (current?.colleges.length === 1) {
-        college.value = current.colleges[0];
-      } else if (!current?.colleges.includes(college.value)) {
-        college.value = '';
-      }
-      render();
+      changed();
     });
     render();
   }

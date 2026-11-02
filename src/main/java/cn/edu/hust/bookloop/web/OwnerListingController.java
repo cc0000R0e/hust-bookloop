@@ -134,7 +134,7 @@ public class OwnerListingController {
     void bind(WebDataBinder binder) {
         binder.setAllowedFields("title", "category", "author", "publisher", "editionNote", "courseName", "description",
                 "conditionCode", "noteLevel", "transferType", "price", "contactType", "contactValue", "scopes[*].majorId",
-                "scopes[*].semester", "tags", "photos");
+                "scopes[*].semester", "scopes[*].college", "tags", "photos");
         binder.setAutoGrowCollectionLimit(50);
     }
 

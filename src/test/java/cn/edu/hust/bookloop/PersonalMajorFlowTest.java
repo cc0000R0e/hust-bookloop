@@ -116,4 +116,50 @@ class PersonalMajorFlowTest {
         assertThat(jdbc.queryForObject("select major_id from listing_scope where listing_id = 601", Long.class)).isEqualTo(501L);
         assertThat(get(client(), "/market").body()).doesNotContain("适合我的专业");
     }
+
+    @Test
+    void collegeOnlyRegistrationProfileAndPublishDefaults() throws Exception {
+        var guest = client();
+        var registered = post(guest, "/register", Map.of("_csrf", token(get(guest, "/register").body()),
+                "username", "college_student", "password", "secure123", "confirmation", "secure123",
+                "college", "计算机学院", "majorId", ""));
+        assertThat(registered.statusCode()).isEqualTo(302);
+        var user = users.findByUsername("college_student").orElseThrow();
+        assertThat(user.getMajorId()).isNull();
+        assertThat(user.getCollege()).isEqualTo("计算机学院");
+        var owner = login("college_student");
+        assertThat(get(owner, "/account").body()).contains("value=\"计算机学院\"");
+        assertThat(get(owner, "/books/new").body()).contains("value=\"计算机学院\"");
+        String csrf = token(get(owner, "/account").body());
+        assertThat(post(owner, "/account/major", Map.of("_csrf", csrf, "college", "软件学院", "majorId", "501")).body())
+                .contains("专业必须属于所选学院");
+        assertThat(users.findByUsername("college_student").orElseThrow().getCollege()).isEqualTo("计算机学院");
+        assertThat(post(owner, "/account/major", Map.of("_csrf", csrf, "college", "软件学院")).statusCode()).isEqualTo(302);
+        assertThat(users.findByUsername("college_student").orElseThrow().getMajorId()).isNull();
+        assertThat(users.findByUsername("college_student").orElseThrow().getCollege()).isEqualTo("软件学院");
+        assertThat(post(owner, "/account/major", Map.of("_csrf", csrf, "college", "不存在的学院")).body()).contains("请选择有效学院");
+        assertThat(post(owner, "/account/major", Map.of("_csrf", csrf, "college", "")).statusCode()).isEqualTo(302);
+        assertThat(users.findByUsername("college_student").orElseThrow().getCollege()).isEmpty();
+    }
+
+    @Test
+    void collegeFiltersIncludeSpecificWholeCollegeAndUnrestrictedScopes() throws Exception {
+        accounts.register("college_market", "secure123", "secure123", null, "计算机学院");
+        long owner = users.findByUsername("college_market").orElseThrow().getId();
+        for (int id = 701; id <= 704; id++) {
+            jdbc.update("insert into listing (id, owner_id, title, category, condition_code, note_level, transfer_type, price, lifecycle_status, admin_blocked, published_at) values (?, ?, ?, 'TEXTBOOK', 'LIGHT_USE', 'NONE', 'SALE', 10, 'ACTIVE', false, CURRENT_TIMESTAMP)", id, owner, "学院测试书" + id);
+        }
+        jdbc.update("insert into listing_scope (listing_id, scope_type, major_id, college, semester_code) values (701,'SPECIFIC',501,null,'Y1_S1'), (702,'COLLEGE',null,'计算机学院','Y1_S1'), (703,'ALL',null,null,'Y1_S1'), (704,'COLLEGE',null,'软件学院','Y1_S1')");
+        var client = login("college_market");
+        String collegeQuery = URLEncoder.encode("计算机学院", StandardCharsets.UTF_8);
+        var result = get(client, "/market?college=" + collegeQuery);
+        assertThat(result.statusCode()).isEqualTo(200);
+        assertThat(result.body()).contains("学院测试书701", "学院测试书702", "学院测试书703").doesNotContain("学院测试书704");
+        assertThat(get(client, "/market?major=501").body()).contains("学院测试书702");
+        assertThat(get(client, "/market?college=" + collegeQuery + "&semester=Y2_S1").body()).doesNotContain("学院测试书702");
+        assertThat(get(client, "/books/702").body()).contains("计算机学院（全院）");
+        assertThat(get(client, "/market?college=" + collegeQuery + "&major=502").statusCode()).isEqualTo(400);
+        var page = get(client, "/market?q=test&sort=low").body();
+        assertThat(page).contains("适合我的学院", "college=", "sort=low");
+    }
 }

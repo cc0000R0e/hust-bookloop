@@ -9,6 +9,7 @@ CREATE TABLE app_user (
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(16) NOT NULL DEFAULT 'USER',
     major_id BIGINT NULL,
+    college VARCHAR(100) NULL,
     default_contact_type VARCHAR(16) NULL,
     default_contact_value VARCHAR(100) NULL,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -102,17 +103,20 @@ CREATE TABLE listing_scope (
     listing_id BIGINT NOT NULL,
     scope_type VARCHAR(16) NOT NULL,
     major_id BIGINT NULL,
+    college VARCHAR(100) NULL,
     semester_code VARCHAR(16) NOT NULL,
-    -- NULL means all majors. Normalize only for uniqueness; no fake major row.
+    -- NULL major may indicate all majors or a whole college. Normalize only for uniqueness; no fake major row.
     major_key BIGINT GENERATED ALWAYS AS (COALESCE(major_id, 0)) STORED,
+    college_key VARCHAR(100) GENERATED ALWAYS AS (COALESCE(college, '')) STORED,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_scope_combination (listing_id, major_key, semester_code),
+    UNIQUE KEY uk_scope_combination (listing_id, major_key, college_key, semester_code),
     KEY ix_scope_filter (semester_code, major_id, listing_id),
     CONSTRAINT fk_scope_listing FOREIGN KEY (listing_id) REFERENCES listing(id),
     CONSTRAINT fk_scope_major FOREIGN KEY (major_id) REFERENCES major(id),
     CONSTRAINT ck_scope_major CHECK (
-        (scope_type = 'ALL' AND major_id IS NULL) OR
-        (scope_type = 'SPECIFIC' AND major_id IS NOT NULL AND major_id > 0)
+        (scope_type = 'ALL' AND major_id IS NULL AND college IS NULL) OR
+        (scope_type = 'SPECIFIC' AND major_id IS NOT NULL AND major_id > 0 AND college IS NULL) OR
+        (scope_type = 'COLLEGE' AND major_id IS NULL AND college IS NOT NULL AND CHAR_LENGTH(TRIM(college)) > 0)
     ),
     CONSTRAINT ck_scope_semester CHECK (semester_code IN (
         'Y1_S1','Y1_S2','Y2_S1','Y2_S2','Y3_S1','Y3_S2',

@@ -77,6 +77,7 @@
     const row = rows.firstElementChild.cloneNode(true);
     window.MajorPicker?.prepareClone(rows.firstElementChild, row);
     row.querySelector('[data-scope="majorId"]').value = "0";
+    row.querySelector('[data-scope="college"]').value = "";
     row.querySelector('[data-scope="semester"]').value = "UNDEFINED";
     rows.append(row);
     window.MajorPicker?.enhance(row.querySelector("[data-major-picker]"));
@@ -112,7 +113,7 @@
   count();
   form.addEventListener("submit", (event) => {
     const scopes = Array.from(rows.children).map((row) =>
-      `${row.querySelector('[data-scope="majorId"]').value}:${row.querySelector('[data-scope="semester"]').value}`);
+      `${row.querySelector('[data-scope="majorId"]').value}:${row.querySelector('[data-scope="majorId"]').value === "0" ? row.querySelector('[data-scope="college"]').value : ""}:${row.querySelector('[data-scope="semester"]').value}`);
     const duplicates = new Set(scopes).size !== scopes.length;
     document.getElementById("scope-error").textContent = duplicates ? "适用范围不能重复。" : "";
     if (duplicates) event.preventDefault();

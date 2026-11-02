@@ -51,7 +51,7 @@
           <h2><span>03</span> 适用范围</h2><p class="section-note">专业与学期成对选择。通用资料可选择“不限专业＋未定义”。</p>
           <div id="scope-rows">
             <div class="scope-row" th:each="scope, row : *{scopes}">
-              <label><span class="sr-only">适用专业</span><select data-major-picker data-scope="majorId" th:field="*{scopes[__${row.index}__].majorId}" required><option value="0">不限专业</option><option th:each="major : ${majors}" th:attr="data-colleges=${major.colleges}" th:value="${major.id}" th:text="${major.name}"></option></select></label>
+              <label><span class="sr-only">适用专业</span><input class="college-value" type="hidden" data-scope="college" th:field="*{scopes[__${row.index}__].college}"><select data-major-picker data-scope="majorId" th:field="*{scopes[__${row.index}__].majorId}" required><option value="0">不限专业</option><option th:each="major : ${majors}" th:attr="data-colleges=${major.colleges}" th:value="${major.id}" th:text="${major.name}"></option></select></label>
               <label><span class="sr-only">适用学期</span><select data-scope="semester" th:field="*{scopes[__${row.index}__].semester}" required><option th:each="item : ${semesters}" th:value="${item.key}" th:text="${item.value}"></option></select></label>
               <button type="button" data-remove-scope>移除</button>
             </div>

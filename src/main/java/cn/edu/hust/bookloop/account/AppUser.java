@@ -17,6 +17,9 @@ public class AppUser {
     @Column(name = "created_at", nullable = false) private LocalDateTime createdAt;
     @Column(name = "updated_at", nullable = false) private LocalDateTime updatedAt;
 
+    @Column(length = 100) private String college;
+    public String getCollege() { return college == null ? "" : college; }
+    public void setCollege(String college) { this.college = college == null || college.isBlank() ? null : college; }
     @Column(name = "major_id") private Long majorId;
     public Long getMajorId() { return majorId; }
     public void setMajorId(Long majorId) { this.majorId = majorId; }

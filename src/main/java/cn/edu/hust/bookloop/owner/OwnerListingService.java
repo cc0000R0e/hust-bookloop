@@ -120,6 +120,7 @@ public class OwnerListingService {
                     var value = new PublishForm.Scope();
                     value.setMajorId(scope.getMajorId() == null ? 0L : scope.getMajorId());
                     value.setSemester(scope.getSemesterCode());
+                    value.setCollege(scope.getCollege());
                     return value;
                 }).toList()));
         form.setTags(new ArrayList<>(listing.getTags().stream().map(tag -> tag.getId()).distinct().toList()));
@@ -278,7 +279,7 @@ public class OwnerListingService {
         em.createNativeQuery("delete from listing_scope where listing_id = :id")
                 .setParameter("id", listing.getId()).executeUpdate();
         form.getScopes().stream().distinct().forEach(scope ->
-                em.persist(new ListingScope(listing, scope.getMajorId(), scope.getSemester())));
+                em.persist(new ListingScope(listing, scope.getMajorId(), scope.getSemester(), scope.getCollege())));
     }
 
     private void replaceTags(Listing listing, PublishForm form) {

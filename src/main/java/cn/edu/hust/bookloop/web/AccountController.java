@@ -26,15 +26,16 @@ public class AccountController {
     public String register(Model model) {
         model.addAttribute("username", "");
         model.addAttribute("majorId", null);
+        model.addAttribute("college", "");
         model.addAttribute("majors", options.majors());
         return "register";
     }
     @PostMapping("/register")
     public String register(@RequestParam(defaultValue = "") String username,
                            @RequestParam(defaultValue = "") String password,
-                           @RequestParam(defaultValue = "") String confirmation, @RequestParam(required = false) Long majorId, Model model) {
+                           @RequestParam(defaultValue = "") String confirmation, @RequestParam(required = false) Long majorId, @RequestParam(defaultValue = "") String college, Model model) {
         try {
-            accounts.register(username, password, confirmation, majorId);
+            accounts.register(username, password, confirmation, majorId, college);
             return "redirect:/login?registered";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("error", exception.getMessage());
@@ -44,6 +45,7 @@ public class AccountController {
         }
         model.addAttribute("username", username);
         model.addAttribute("majorId", majorId);
+        model.addAttribute("college", college);
         model.addAttribute("majors", options.majors());
         return "register"; // Never return passwords in the model or HTML.
     }
@@ -53,6 +55,7 @@ public class AccountController {
         model.addAttribute("username", user.getUsername());
         model.addAttribute("role", user.getRole());
         model.addAttribute("majorId", user.getMajorId());
+        model.addAttribute("college", user.getCollege());
         model.addAttribute("majors", options.majors());
         var majorNames = user.getMajorId() == null ? java.util.List.<String>of()
                 : jdbc.queryForList("select name from major where id = ?", String.class, user.getMajorId());
@@ -64,10 +67,10 @@ public class AccountController {
     }
 
     @PostMapping("/account/major")
-    public String major(Principal principal, @RequestParam(required = false) Long majorId, Model model,
+    public String major(Principal principal, @RequestParam(required = false) Long majorId, @RequestParam(defaultValue = "") String college, Model model,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirect) {
         try {
-            accounts.updateMajor(principal.getName(), majorId);
+            accounts.updateMajor(principal.getName(), majorId, college);
             redirect.addFlashAttribute("success", "个人专业已保存，不影响已发布资料的适用范围。");
             return "redirect:/account";
         } catch (IllegalArgumentException exception) {

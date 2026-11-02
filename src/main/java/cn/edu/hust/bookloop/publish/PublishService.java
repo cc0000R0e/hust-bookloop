@@ -51,7 +51,7 @@ public class PublishService {
         });
         var book = new Listing(user.getId(), form);
         em.persist(book);
-        for (var scope : form.getScopes()) em.persist(new ListingScope(book, scope.getMajorId(), scope.getSemester()));
+        for (var scope : form.getScopes()) em.persist(new ListingScope(book, scope.getMajorId(), scope.getSemester(), scope.getCollege()));
         for (Long tag : form.getTags().stream().distinct().toList()) {
             em.createNativeQuery("insert into listing_tag (listing_id, tag_id) values (:listing, :tag)")
                     .setParameter("listing", book.getId()).setParameter("tag", tag).executeUpdate();

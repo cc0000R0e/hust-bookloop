@@ -53,7 +53,7 @@ public class BookService {
         var visibleContacts = signedIn ? contacts.findByListingIdOrderByIdAsc(id).stream()
                 .map(c -> new Contact(CONTACT_TYPES.get(c.getType()), c.getValue())).toList() : List.<Contact>of();
         var scopes = book.getScopes().stream().map(scope -> {
-            String major = "ALL".equals(scope.getScopeType()) ? "不限专业" : entityManager
+            String major = "ALL".equals(scope.getScopeType()) ? "不限专业" : "COLLEGE".equals(scope.getScopeType()) ? scope.getCollege() + "（全院）" : entityManager
                     .createQuery("select m.name from Major m where m.id = :id", String.class)
                     .setParameter("id", scope.getMajorId()).getResultStream().findFirst().orElse("未填写");
             return major + " · " + MarketOptions.SEMESTERS.get(scope.getSemesterCode());

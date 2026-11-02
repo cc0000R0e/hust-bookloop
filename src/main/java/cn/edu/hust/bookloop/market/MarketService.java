@@ -46,6 +46,11 @@ public class MarketService {
                 || !tags.stream().map(Option::id).toList().containsAll(filter.tags())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "专业或标签不存在");
         }
+        if (!filter.college().isEmpty() && majors.stream().noneMatch(m ->
+                (filter.major() == null || filter.major() == 0 || m.id().equals(filter.major()))
+                && CollegeNames.split(m.colleges()).contains(filter.college()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "学院不存在或与专业不匹配");
+        }
         Map<Long, String> majorNames = majors.stream().collect(Collectors.toMap(Option::id, Option::name));
         Sort sort = switch (filter.sort()) {
             case "low" -> Sort.by("price").ascending();
@@ -54,7 +59,7 @@ public class MarketService {
         };
         // Stable ordering prevents ties from shuffling between pages.
         sort = sort.and(Sort.by("id").descending());
-        var entries = listings.findAll(specification(filter), PageRequest.of(filter.page(), 20, sort));
+        var entries = listings.findAll(specification(filter, majors), PageRequest.of(filter.page(), 20, sort));
         var covers = new java.util.HashMap<Long, String>();
         if (!entries.isEmpty()) images.findByListingIdInOrderBySortOrderAsc(entries.stream().map(Listing::getId).toList())
                 .forEach(image -> covers.putIfAbsent(image.getListingId(), "/books/" + image.getListingId() + "/images/" + image.getId()));
@@ -63,7 +68,7 @@ public class MarketService {
                         MarketOptions.label(MarketOptions.CONDITIONS, book.getConditionCode()), book.getPrice(),
                         "GIFT".equals(book.getTransferType()),
                         book.getScopes().stream().map(scope ->
-                            ("ALL".equals(scope.getScopeType()) ? "不限专业" : majorNames.get(scope.getMajorId()))
+                            ("ALL".equals(scope.getScopeType()) ? "不限专业" : "COLLEGE".equals(scope.getScopeType()) ? scope.getCollege() + "（全院）" : majorNames.get(scope.getMajorId()))
                             + " · " + MarketOptions.SEMESTERS.get(scope.getSemesterCode()))
                             .distinct().sorted().toList(),
                         book.getTags().stream().map(BookTag::getName).sorted(Comparator.naturalOrder()).toList(), covers.get(book.getId())));
@@ -74,7 +79,7 @@ public class MarketService {
         return title == null || title.isBlank() ? "未命名资料" : title;
     }
 
-    private Specification<Listing> specification(MarketFilter filter) {
+    private Specification<Listing> specification(MarketFilter filter, List<Option> majors) {
         return (root, query, cb) -> {
             var predicates = new ArrayList<Predicate>();
             predicates.add(cb.equal(root.get("lifecycleStatus"), "ACTIVE"));
@@ -92,15 +97,27 @@ public class MarketService {
                         cb.like(cb.lower(root.get("author")), pattern, '!'),
                         cb.like(cb.lower(root.get("courseName")), pattern, '!'), cb.exists(tagQuery)));
             }
-            if (filter.major() != null || !filter.semester().isEmpty()) {
+            if (filter.major() != null || !filter.college().isEmpty() || !filter.semester().isEmpty()) {
                 var scopeQuery = query.subquery(Long.class);
                 var scope = scopeQuery.from(ListingScope.class);
                 var scopePredicates = new ArrayList<Predicate>();
                 scopePredicates.add(cb.equal(scope.get("listing").get("id"), root.get("id")));
-                if (filter.major() != null) {
-                    var all = cb.equal(scope.get("scopeType"), "ALL");
-                    scopePredicates.add(filter.major() == 0 ? all
-                            : cb.or(all, cb.equal(scope.get("majorId"), filter.major())));
+                var all = cb.equal(scope.get("scopeType"), "ALL");
+                if (filter.major() != null && filter.major() > 0) {
+                    var colleges = majors.stream().filter(m -> m.id().equals(filter.major()))
+                            .flatMap(m -> CollegeNames.split(m.colleges()).stream())
+                            .filter(c -> filter.college().isEmpty() || c.equals(filter.college())).toList();
+                    var collegeScope = colleges.isEmpty() ? cb.disjunction()
+                            : cb.and(cb.equal(scope.get("scopeType"), "COLLEGE"), scope.get("college").in(colleges));
+                    scopePredicates.add(cb.or(all, cb.equal(scope.get("majorId"), filter.major()), collegeScope));
+                } else if (!filter.college().isEmpty()) {
+                    var majorIds = majors.stream().filter(m -> CollegeNames.split(m.colleges()).contains(filter.college()))
+                            .map(Option::id).toList();
+                    var specific = majorIds.isEmpty() ? cb.disjunction() : scope.get("majorId").in(majorIds);
+                    scopePredicates.add(cb.or(all, specific, cb.and(cb.equal(scope.get("scopeType"), "COLLEGE"),
+                            cb.equal(scope.get("college"), filter.college()))));
+                } else if (filter.major() != null) {
+                    scopePredicates.add(all);
                 }
                 if (!filter.semester().isEmpty()) {
                     scopePredicates.add(cb.equal(scope.get("semesterCode"), filter.semester()));
