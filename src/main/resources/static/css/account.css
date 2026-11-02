@@ -1,0 +1,88 @@
+/* Account workspace: reuse the market's ink, paper, border and accent colors. */
+.account-page { background: var(--paper); }
+.account-page header { background: #fff; border-bottom: 1px solid var(--line); }
+.account-page .nav { max-width: none; min-height: 84px; }
+.account-shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: calc(100vh - 85px); }
+.account-sidebar { display: flex; flex-direction: column; gap: 22px; padding: 26px 18px; background: #fff; border-right: 1px solid var(--line); }
+.side-group { display: grid; gap: 5px; }
+.side-label { margin: 12px 16px 8px; color: var(--muted); font-size: 11px; letter-spacing: 2px; }
+.side-group a { display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; border-radius: 6px; color: #62676b; }
+.side-group a span { color: #92979b; }
+.side-group .selected { background: var(--paper); color: var(--ink); font-weight: 600; }
+.side-group .selected span { color: var(--accent); font-size: 10px; align-self: center; }
+.side-group a:hover { background: var(--paper); }
+.logout-form { margin-top: auto; padding-top: 24px; }
+.logout-form button { width: 100%; display: flex; justify-content: space-between; }
+.account-main { padding: 34px clamp(24px, 3vw, 64px) 42px; min-width: 0; }
+.breadcrumb { margin: 0 0 20px; color: var(--muted); font-size: 12px; }
+.account-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+.account-heading h1 { font-size: 30px; margin: 0 0 10px; letter-spacing: -.8px; }
+.account-page p { line-height: 1.8; }
+.account-heading p, .card-heading p, .account-identity p { margin: 0; color: var(--muted); font-size: 13px; }
+.account-page .primary, .account-page .secondary { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 11px 19px; border-radius: 6px; font-size: 13px; font-weight: 600; line-height: 1.5; transition: background .15s, border-color .15s; }
+.account-page .primary { border: 1px solid var(--ink); background: var(--ink); color: #fff; }
+.account-page .primary:hover { background: #39434c; border-color: #39434c; }
+.account-page .secondary { background: #fff; border: 1px solid #dce1e4; color: var(--ink); }
+.account-page .secondary:hover { background: var(--paper); border-color: #aeb6bc; }
+.account-welcome { display: flex; align-items: center; gap: 18px; padding: 25px; border: 1px solid var(--line); border-radius: 10px; background: #fff; margin-bottom: 24px; }
+.account-avatar { display: grid; place-items: center; flex: 0 0 62px; height: 62px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); font-size: 23px; font-weight: 600; }
+.account-identity { min-width: 0; overflow-wrap: anywhere; }
+.account-identity h2 { margin: 0 0 10px; font-size: 19px; }
+.role-badge { display: inline-block; font-size: 11px; font-weight: 400; background: var(--paper); padding: 4px 8px; border-radius: 4px; margin-left: 12px; vertical-align: middle; color: #62676b; }
+.welcome-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+.account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.account-card { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.card-heading { padding: 24px 26px 20px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-size: 10px; letter-spacing: 1.8px; color: var(--muted); }
+.card-heading h2 { font-size: 18px; margin: 8px 0; }
+.card-content { padding: 4px 26px 26px; }
+.card-content label { display: block; font-size: 13px; margin: 20px 0; color: #4e5c66; }
+.card-content input, .card-content select { display: block; width: 100%; min-height: 45px; margin-top: 9px; border: 1px solid #dce1e4; border-radius: 5px; padding: 10px 12px; background: #fff; color: var(--ink); }
+.card-content .muted { background: var(--paper); padding: 12px 14px; border-radius: 5px; color: var(--muted); font-size: 12px; margin: 20px 0; }
+.account-feedback { padding: 14px 18px; border: 1px solid #d8dfdc; border-radius: 6px; background: #fff; }
+.account-feedback.error { border-color: var(--accent); color: var(--accent); }
+.account-admin { margin-top: 28px; }
+.admin-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.admin-heading h2 { font-size: 17px; margin: 0; }
+.admin-heading span { font-size: 12px; color: var(--muted); }
+.admin-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.admin-shortcuts a { display: flex; justify-content: space-between; gap: 12px; padding: 18px; background: #fff; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
+.admin-shortcuts a:hover { border-color: #aeb6bc; }
+.admin-shortcuts span { color: var(--muted); }
+.account-footer { margin: 28px 0 0; color: var(--muted); font-size: 11px; }
+.skip-link { position: absolute; left: 16px; top: -100px; padding: 12px; background: #fff; z-index: 5; }
+.skip-link:focus { top: 12px; }
+@media (max-width: 1150px) {
+  .account-shell { grid-template-columns: 200px minmax(0, 1fr); }
+  .account-welcome { flex-wrap: wrap; }
+  .welcome-actions { margin-left: 80px; }
+  .account-grid { gap: 16px; }
+  .card-heading { padding: 22px 20px 18px; }
+  .card-content { padding: 4px 20px 22px; }
+}
+@media (max-width: 900px) {
+  .account-grid { grid-template-columns: 1fr; }
+  .admin-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .account-page .nav { padding: 18px 16px; flex-wrap: wrap; gap: 16px; }
+  .account-page .brand { font-size: 21px; }
+  .account-page .navlinks { display: flex; gap: 22px; flex-wrap: wrap; }
+  .account-page .navlinks a { font-size: 13px; }
+  .account-shell { display: flex; flex-direction: column; }
+  .account-sidebar { order: 2; border-right: 0; border-top: 1px solid var(--line); padding: 20px 16px; }
+  .side-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .side-label { grid-column: 1 / -1; }
+  .logout-form { padding-top: 0; }
+  .account-main { padding: 24px 16px; }
+  .account-heading { gap: 10px; align-items: flex-start; }
+  .account-heading h1 { font-size: 26px; }
+  .account-heading .primary { white-space: nowrap; padding: 10px 12px; }
+  .account-welcome { padding: 20px; gap: 14px; }
+  .account-avatar { flex-basis: 48px; height: 48px; }
+  .account-identity { flex: 1; }
+  .account-identity h2 { font-size: 17px; }
+  .role-badge { margin-left: 5px; }
+  .welcome-actions { margin-left: 0; width: 100%; }
+  .welcome-actions a { flex: 1; padding: 10px; }
+}

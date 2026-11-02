@@ -1,33 +1,52 @@
-java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --server.port=8081<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>账户 · HUST BookLoop</title>
+  <title>我的账户 · HUST BookLoop</title>
   <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
-  <link rel="stylesheet" th:href="@{/prototype/css/account.css}">
+  <link rel="stylesheet" th:href="@{/css/account.css}">
 </head>
-<body>
-  <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/}">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a th:href="@{/account}">我的账户</a></div></nav></header>
-  <main class="account-layout" style="text-align:center">
-<h1>我的账户</h1>
-<div class="panel" style="max-width:600px;margin:30px auto">
-  <h2>你好，<span th:text="${username}"></span></h2>
-  <p>当前账号：<strong th:text="${username}"></strong></p>
-  <p class="muted">你已通过服务端密码验证。资料发布、图片和市场查询已接入；可到“我的发布”管理自己的资料和交易状态。</p>
-  <p><a th:href="@{/}">进入教材市场 →</a></p>
-  <p><a th:href="@{/books/new}">填写发布资料 →</a></p>
-  <p><a th:href="@{/my/listings}">管理我的发布 →</a></p>
-  <div th:if="${role == 'ADMIN'}">
-    <p><a th:href="@{/admin/reports}">处理待审举报 →</a></p>
-    <p><a th:href="@{/admin/listings}">管理资料限制 →</a></p>
-    <p><a th:href="@{/admin/options/majors}">管理专业 →</a> · <a th:href="@{/admin/options/tags}">管理标签 →</a></p>
-    <p><a th:href="@{/admin/reports/history}">举报处理历史 →</a> · <a th:href="@{/admin/events}">操作日志 →</a></p>
-  </div>
-  <p th:if="${success}" th:text="${success}" role="status"></p>
-  <p th:if="${error}" th:text="${error}" role="alert"></p>
-  <form class="account-form" th:action="@{/account/contact}" method="post">
-    <h2>默认联系方式</h2>
+<body class="account-page">
+<a class="skip-link" href="#account-main">跳转到账户设置</a>
+<header>
+  <nav class="nav" aria-label="主导航">
+    <a class="brand" th:href="@{/}"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M16 7C12 4 6 4 2 5v22c5-1 10-1 14 2 4-3 9-3 14-2V5c-4-1-10-1-14 2Z"/><path d="M16 7v22"/></svg>HUST BookLoop</a>
+    <div class="navlinks"><a th:href="@{/}">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a class="active" aria-current="page" th:href="@{/account}">我的账户</a></div>
+  </nav>
+</header>
+<div class="account-shell">
+  <aside class="account-sidebar" aria-label="个人空间导航">
+    <nav class="side-group" aria-label="个人空间">
+      <p class="side-label">个人空间</p>
+      <a class="selected" aria-current="page" th:href="@{/account}">我的账户<span aria-hidden="true">●</span></a>
+      <a th:href="@{/my/listings}">我的发布<span aria-hidden="true">↗</span></a>
+      <a th:href="@{/books/new}">发布资料<span aria-hidden="true">＋</span></a>
+    </nav>
+    <nav class="side-group" aria-label="管理中心" th:if="${role == 'ADMIN'}">
+      <p class="side-label">管理中心</p>
+        <a th:href="@{/admin/reports}">待处理举报<span aria-hidden="true">↗</span></a>
+        <a th:href="@{/admin/listings}">资料限制<span aria-hidden="true">↗</span></a>
+        <a th:href="@{/admin/options/majors}">专业管理<span aria-hidden="true">↗</span></a>
+        <a th:href="@{/admin/options/tags}">标签管理<span aria-hidden="true">↗</span></a>
+        <a th:href="@{/admin/reports/history}">举报处理历史<span aria-hidden="true">↗</span></a>
+        <a th:href="@{/admin/events}">资料操作日志<span aria-hidden="true">↗</span></a>
+    </nav>
+    <form class="logout-form" th:action="@{/logout}" method="post"><button class="secondary" type="submit">退出登录 <span aria-hidden="true">↗</span></button></form>
+  </aside>
+  <main class="account-main" id="account-main">
+    <p class="breadcrumb">个人空间 / 我的账户</p>
+    <div class="account-heading"><div><h1>我的账户</h1><p>管理联系信息，照顾好你的每一本书。</p></div><a class="primary" th:href="@{/books/new}">＋ 发布资料</a></div>
+    <section class="account-welcome" aria-label="账户信息">
+      <div class="account-avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(username, 0, 1))}"></div>
+      <div class="account-identity"><h2>你好，<span th:text="${username}"></span><span class="role-badge" th:text="${role == 'ADMIN' ? '管理员' : '普通用户'}"></span></h2><p>当前账号：<strong th:text="${username}"></strong> · 账号名称不可修改</p></div>
+      <div class="welcome-actions"><a class="secondary" th:href="@{/my/listings}">我的发布 ↗</a><a class="secondary" th:href="@{/}">浏览教材市场 →</a></div>
+    </section>
+    <p class="account-feedback" th:if="${success}" th:text="${success}" role="status"></p>
+    <p class="account-feedback error" th:if="${error}" th:text="${error}" role="alert"></p>
+    <div class="account-grid">
+  <form class="account-card" th:action="@{/account/contact}" method="post">
+    <div class="card-heading"><span class="eyebrow">CONTACT INFORMATION</span><h2>默认联系方式</h2><p>发布资料时自动带入，随时可以调整。</p></div><div class="card-content">
     <label>联系方式类型<select name="type">
       <option value="" th:selected="${contactType == null or contactType == ''}">未设置</option>
       <option value="WECHAT" th:selected="${contactType == 'WECHAT'}">微信</option>
@@ -37,18 +56,32 @@ java -jar target/bookloop-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql --se
     <label>联系账号<input name="value" th:value="${contactValue}" maxlength="100"></label>
     <p class="muted">修改默认联系方式不会改变已发布书籍的联系方式。两项同时清空可取消设置。</p>
     <button class="primary" type="submit">保存联系方式</button>
+    </div>
   </form>
-  <form class="account-form" th:action="@{/account/password}" method="post">
-    <h2>修改密码</h2>
+  <form class="account-card" th:action="@{/account/password}" method="post">
+    <div class="card-heading"><span class="eyebrow">ACCOUNT SECURITY</span><h2>修改密码</h2><p>更新密码，保护你的账户。</p></div><div class="card-content">
     <label>原密码<input name="oldPassword" type="password" required autocomplete="current-password"></label>
     <label>新密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
     <label>确认新密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
     <p class="muted">修改后需要重新登录。</p>
-    <button class="primary" type="submit">修改密码</button>
+    <button class="secondary" type="submit">修改密码</button>
+    </div>
   </form>
-  <form th:action="@{/logout}" method="post"><button class="primary" type="submit">退出登录</button></form>
-</div>
-    <p class="muted">MySQL模式保存真实账号；preview模式仅使用临时数据库，停止服务后数据清空。</p>
+
+    </div>
+    <section class="account-admin" th:if="${role == 'ADMIN'}" aria-labelledby="admin-title">
+      <div class="admin-heading"><h2 id="admin-title">管理中心</h2><span>仅管理员可见</span></div>
+      <div class="admin-shortcuts">
+          <a th:href="@{/admin/reports}">待处理举报<span aria-hidden="true">↗</span></a>
+          <a th:href="@{/admin/listings}">资料限制<span aria-hidden="true">↗</span></a>
+          <a th:href="@{/admin/options/majors}">专业管理<span aria-hidden="true">↗</span></a>
+          <a th:href="@{/admin/options/tags}">标签管理<span aria-hidden="true">↗</span></a>
+          <a th:href="@{/admin/reports/history}">举报处理历史<span aria-hidden="true">↗</span></a>
+          <a th:href="@{/admin/events}">资料操作日志<span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <p class="account-footer">HUST BookLoop · 让知识在校园继续流转</p>
   </main>
+</div>
 </body>
 </html>
