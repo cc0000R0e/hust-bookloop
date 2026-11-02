@@ -3,6 +3,7 @@
 .major-picker-tools [hidden] { display: none !important; }
 .major-picker-hint { font-size: 11px; line-height: 1.6; color: #7c8287; font-weight: 400; }
 select[data-major-picker] { width: 100%; max-width: 100%; min-height: 42px; }
+.major-picker-tools select, select[data-major-picker] { font-weight: 600; }
 .my-major-shortcut { display: inline-flex; align-items: center; padding: 10px 14px; border: 1px solid #dce1e4; border-radius: 5px; font-size: 12px; white-space: nowrap; background: #fff; }
 
 .major-picker-suggestions { display: block; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; border: 1px solid #dce1e4; border-radius: 6px; background: #fff; box-shadow: 0 4px 12px #222b3310; text-align: left; }

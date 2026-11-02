@@ -35,7 +35,7 @@
     <section class="filters" aria-label="筛选资料">
       <a class="my-major-shortcut" th:if="${hasPersonalScope}" th:href="${personalMajorUrl}" th:text="${personalMajor != null ? '适合我的专业' : '适合我的学院'}">适合我的学院 / 专业</a>
       <a class="my-major-shortcut" th:if="${username != null and !hasPersonalScope}" th:href="@{/account}">设置我的学院 / 专业</a>
-      <label><span class="sr-only">专业</span><input class="college-value" type="hidden" name="college" form="market-filters" th:value="${filter.college}"><select data-major-picker name="major" form="market-filters">
+      <label class="market-major"><span class="sr-only">专业</span><input class="college-value" type="hidden" name="college" form="market-filters" th:value="${filter.college}"><select data-major-picker name="major" form="market-filters">
         <option value="">全部专业</option>
         <option value="0" th:selected="${filter.major != null and filter.major == 0}">不限专业</option>
         <option th:each="major : ${majors}" th:attr="data-colleges=${major.colleges}" th:value="${major.id}" th:text="${major.name}" th:selected="${filter.major == major.id}"></option>

@@ -54,7 +54,6 @@
           <option th:if="${majorDisabled}" th:value="${majorId}" th:text="${currentMajorName} + '（已停用，可保留或更换）'" selected></option>
           <option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}" th:attr="data-colleges=${major.colleges}" th:selected="${majorId == major.id}"></option>
         </select></label>
-        <p class="muted">可以只选学院，也可清空选择；找不到专业时由管理员补充。已停用的个人专业保留记录，新发布默认使用不限专业。</p>
         <button class="primary" type="submit">保存学院与专业</button>
       </div>
     </form>
