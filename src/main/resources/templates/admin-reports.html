@@ -27,7 +27,7 @@
     <div>
 <p class="eyebrow">ADMIN · REPORTS</p>
 <h1>待处理举报</h1>
-<p>核实情况后处理或驳回，提交后统一由管理员下架关联资料。</p>
+<p>核实情况后处理或驳回；处理举报会下架资料，驳回不改变资料状态。</p>
 </div>
     <span class="admin-count" th:text="${result.totalElements} + ' 条待处理'">
 </span>
@@ -90,10 +90,10 @@
         </label>
         <label>处理理由
           <textarea name="reason" required maxlength="500" rows="3"
-                    placeholder="填写核实结论；该理由同时用于管理员下架。">
+                    placeholder="填写处理或驳回理由。">
 </textarea>
         </label>
-        <p class="report-panel-note">提交后无论处理或驳回，关联资料都会由管理员下架。</p>
+        <p class="report-panel-note">处理举报会下架关联资料；驳回举报仅记录理由，不改变资料状态或已有管理员限制。</p>
         <button type="submit">提交处理结果</button>
       </form>
     </article>

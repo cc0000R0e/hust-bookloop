@@ -238,7 +238,7 @@ class AdminReportFlowTest {
         var queue = get(admin, "/admin/reports");
         assertThat(queue.statusCode()).isEqualTo(200);
         assertThat(queue.body()).contains("待审核资料", "admin_reporter", "描述与实物不符",
-                "处理举报", "驳回举报", "处理理由", "都会由管理员下架")
+                "处理举报", "驳回举报", "处理理由", "驳回不改变资料状态")
                 .doesNotContain("同时下架关联资料", "管理员下架原因");
         assertThat(get(admin, "/admin/listings").statusCode()).isEqualTo(200);
     }
@@ -290,7 +290,7 @@ class AdminReportFlowTest {
     }
 
     @Test
-    void rejectingAlsoBlocksListingAndRequiresOneReason() throws Exception {
+    void rejectingPreservesListingAndRequiresOneReason() throws Exception {
         reportService.submit(603, "OTHER", "需要管理员核实", "admin_reporter");
         var admin = client();
         login(admin, "the_admin");
@@ -306,11 +306,33 @@ class AdminReportFlowTest {
                 "reason", "举报内容不成立",
                 "expectedVersion", "0"));
         assertThat(jdbc.queryForObject("select status from report", String.class)).isEqualTo("REJECTED");
-        assertThat(jdbc.queryForObject("select admin_blocked from listing where id = 603", Boolean.class)).isTrue();
-        assertThat(jdbc.queryForObject("select admin_reason from listing where id = 603", String.class))
-                .isEqualTo("举报内容不成立");
-        assertThat(jdbc.queryForObject("select count(*) from listing_event where listing_id = 603 "
-                + "and action_code = 'ADMIN_BLOCK' and reason = '举报内容不成立'", Long.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select admin_blocked from listing where id = 603", Boolean.class)).isFalse();
+        assertThat(jdbc.queryForObject("select lifecycle_status from listing where id = 603", String.class)).isEqualTo("ACTIVE");
+        assertThat(jdbc.queryForObject("select admin_reason from listing where id = 603", String.class)).isNull();
+        assertThat(jdbc.queryForObject("select resolution_note from report", String.class)).isEqualTo("举报内容不成立");
+        assertThat(jdbc.queryForObject("select count(*) from listing_event where listing_id = 603", Long.class)).isZero();
+        assertThat(listingVersion(603)).isZero();
+
+    }
+
+    @Test
+    void rejectionPreservesExistingRestrictionAndOtherLifecycleStates() {
+        reportService.submit(601, "OTHER", "待核实", "admin_reporter");
+        long id = reportId();
+        adminService.blockListing(601, "其他违规原因", listingVersion(601), "the_admin");
+        var before = jdbc.queryForMap("select * from listing where id = 601");
+        adminService.handleReport(id, "REJECTED", "本次举报不成立", 0, "the_admin");
+        assertThat(jdbc.queryForMap("select * from listing where id = 601")).isEqualTo(before);
+        assertThat(jdbc.queryForObject("select count(*) from listing_event where listing_id = 601", Long.class)).isEqualTo(1L);
+        for (String state : List.of("RESERVED", "COMPLETED", "WITHDRAWN")) {
+            jdbc.update("delete from report");
+            jdbc.update("update listing set lifecycle_status = 'ACTIVE' where id = 603");
+            reportService.submit(603, "OTHER", "待核实", "admin_reporter");
+            jdbc.update("update listing set lifecycle_status = ? where id = 603", state);
+            var listingBefore = jdbc.queryForMap("select * from listing where id = 603");
+            adminService.handleReport(reportId(), "REJECTED", "不成立", 0, "the_admin");
+            assertThat(jdbc.queryForMap("select * from listing where id = 603")).isEqualTo(listingBefore);
+        }
     }
 
     @Test

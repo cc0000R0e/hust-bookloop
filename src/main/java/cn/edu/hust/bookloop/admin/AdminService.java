@@ -109,7 +109,7 @@ public class AdminService {
         }
         var listing = listings.findByIdForUpdate(report.getListingId())
                 .orElseThrow(() -> new AdminFailure(HttpStatus.NOT_FOUND, "关联资料不存在。"));
-        if (!listing.isAdminBlocked()) {
+        if ("RESOLVED".equals(decision) && !listing.isAdminBlocked()) {
             try {
                 String before = snapshot(listing);
                 listing.blockByAdmin(reason);

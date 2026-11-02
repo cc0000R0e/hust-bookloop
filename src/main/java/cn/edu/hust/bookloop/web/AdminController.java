@@ -31,7 +31,8 @@ public class AdminController {
                                Principal principal, RedirectAttributes redirect) {
         try {
             adminService.handleReport(id, decision, reason, expectedVersion, principal.getName());
-            redirect.addFlashAttribute("success", "举报已处理，关联资料已下架。");
+            redirect.addFlashAttribute("success", "REJECTED".equals(decision)
+                    ? "举报已驳回，资料状态保持不变。" : "举报已处理，关联资料已下架。");
         } catch (AdminFailure exception) {
             redirect.addFlashAttribute("error", exception.getMessage());
         }
