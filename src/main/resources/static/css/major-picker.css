@@ -11,9 +11,5 @@ select[data-major-picker] { width: 100%; max-width: 100%; min-height: 42px; }
 .major-picker-suggestion small { font-size: 11px; color: #7c8287; }
 .major-picker-suggestion:hover, .major-picker-suggestion[aria-selected="true"] { background: #f4f5f6; }
 select[data-major-picker][hidden] { display: none !important; }
-.major-picker-selected { font-size: 13px; line-height: 1.7; color: #222b33; }
-.major-picker-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.major-picker-actions button { border: 1px solid #dce1e4; border-radius: 4px; padding: 6px 10px; background: #fff; font-size: 12px; }
-.major-picker-actions button:hover { background: #f4f5f6; }
 
 select[data-major-picker][hidden] { display: none !important; }

@@ -21,7 +21,6 @@
     <option value="">未设置（可以跳过）</option>
     <option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}" th:attr="data-colleges=${major.colleges}" th:selected="${majorId == major.id}"></option>
   </select></label>
-  <p class="muted">可以只选学院；找不到专业时可先跳过，之后在我的账户中设置。</p>
   <label>密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
   <label>确认密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
   <p class="muted">密码6—64位；若使用中文等字符，UTF-8总长度不能超过72字节。</p>

@@ -11,7 +11,8 @@
     sources.set(select, options);
     const collegeValue = select.parentElement.querySelector('.college-value');
     const empty = options.find(option => option.value === '' || option.value === '0');
-    select.hidden = true;
+    select.hidden = false;
+    select.setAttribute('aria-label', '选择专业（可不填）');
     select.required = false;
     const controls = document.createElement('span');
     controls.className = 'major-picker-tools';
@@ -31,13 +32,12 @@
     const hint = document.createElement('span');
     hint.className = 'major-picker-hint';
     hint.setAttribute('role', 'status');
-    const selectedText = document.createElement('span');
-    selectedText.className = 'major-picker-selected';
+    hint.hidden = true;
     const suggestions = document.createElement('span');
     suggestions.className = 'major-picker-suggestions';
     suggestions.id = `major-suggestions-${++pickerId}`;
     suggestions.setAttribute('role', 'listbox');
-    suggestions.setAttribute('aria-label', '匹配的专业');
+    suggestions.setAttribute('aria-label', '匹配的学院和专业');
     suggestions.hidden = true;
     search.setAttribute('role', 'combobox');
     search.setAttribute('aria-autocomplete', 'list');
@@ -45,39 +45,61 @@
     search.setAttribute('aria-expanded', 'false');
     let candidates = [];
     let activeIndex = -1;
+    let syncing = false;
     function closeSuggestions() {
       suggestions.hidden = true;
       search.setAttribute('aria-expanded', 'false');
       search.removeAttribute('aria-activedescendant');
       activeIndex = -1;
     }
-    function render() {
+    function render(selected = select.value) {
       collegeValue.value = college.value;
-      const current = options.find(option => option.value === select.value && option.value !== '' && option.value !== '0');
-      selectedText.textContent = current ? `已选专业：${current.text}`
-        : college.value ? `已选学院：${college.value}（未指定专业）` : empty.text;
-      hint.textContent = current ? '可清除专业，仅保留学院。' : '可以只选学院；专业通过搜索建议选择。';
+      select.replaceChildren();
+      const add = option => select.add(new Option(option.text, option.value, false, option.value === selected));
+      add({ value: empty.value, text: '不填专业' });
+      if (empty.value === '' && !college.value && options.some(option => option.value === '0')) {
+        add({ value: '0', text: '仅看不限专业资料' });
+      }
+      options.filter(option => option.value !== '' && option.value !== '0'
+        && (!college.value || option.colleges.includes(college.value) || option.value === selected))
+        .forEach(option => {
+          const node = new Option(option.text, option.value, false, option.value === selected);
+          node.dataset.colleges = option.colleges.join('|');
+          select.add(node);
+        });
+      select.value = Array.from(select.options).some(option => option.value === selected) ? selected : empty.value;
+      hint.hidden = true;
     }
     function changed() {
       render();
+      syncing = true;
       select.dispatchEvent(new Event('change', { bubbles: true }));
+      syncing = false;
       collegeValue.dispatchEvent(new Event('change', { bubbles: true }));
     }
     function choose(option) {
-      select.value = option.value;
-      if (!option.colleges.includes(college.value)) {
+      const selected = option.kind === 'college' ? empty.value : option.value;
+      if (option.kind === 'college') {
+        college.value = option.text;
+      } else if (!option.colleges.includes(college.value)) {
         college.value = option.colleges.length === 1 ? option.colleges[0] : '';
       }
       search.value = '';
       closeSuggestions();
+      render(selected);
       changed();
     }
     function showSuggestions() {
       const query = search.value.trim().toLocaleLowerCase();
       if (!query) { closeSuggestions(); return; }
-      candidates = options.filter(option => option.value !== '' && option.value !== '0'
+      const collegeMatches = Array.from(names)
+        .filter(name => name.toLocaleLowerCase().includes(query))
+        .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+        .map(name => ({ kind: 'college', text: name }));
+      const majorMatches = options.filter(option => option.value !== '' && option.value !== '0'
         && (!college.value || option.colleges.includes(college.value))
         && `${option.text} ${option.colleges.join(' ')}`.toLocaleLowerCase().includes(query));
+      candidates = [...collegeMatches, ...majorMatches];
       suggestions.replaceChildren();
       activeIndex = -1;
       search.removeAttribute('aria-activedescendant');
@@ -90,7 +112,9 @@
         const name = document.createElement('span');
         name.textContent = option.text;
         const detail = document.createElement('small');
-        detail.textContent = option.colleges.join(' / ') || '未分组';
+        detail.textContent = option.kind === 'college'
+          ? '学院 · 仅选择学院，不指定专业'
+          : `专业 · ${option.colleges.join(' / ') || '未分组'}`;
         item.append(name, detail);
         item.addEventListener('pointerdown', event => event.preventDefault());
         item.addEventListener('click', event => { event.preventDefault(); choose(option); });
@@ -98,23 +122,10 @@
       });
       suggestions.hidden = candidates.length === 0;
       search.setAttribute('aria-expanded', String(candidates.length > 0));
-      hint.textContent = candidates.length ? '点击专业可精确选择；不选专业则保留上方学院。' : '没有匹配结果，请换个关键词或直接选择学院。';
+      hint.hidden = candidates.length > 0;
+      hint.textContent = '没有匹配结果，请换个关键词或直接选择学院。';
     }
-    const actions = document.createElement('span');
-    actions.className = 'major-picker-actions';
-    const action = (text, handler) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = text;
-      button.addEventListener('click', event => { event.preventDefault(); handler(); search.value = ''; closeSuggestions(); changed(); });
-      actions.append(button);
-    };
-    action('清除专业', () => { select.value = empty.value; });
-    action('清空选择', () => { select.value = empty.value; college.value = ''; });
-    if (empty.value === '' && options.some(option => option.value === '0')) {
-      action('仅看不限专业', () => { select.value = '0'; college.value = ''; });
-    }
-    controls.append(search, suggestions, college, selectedText, actions, hint);
+    controls.append(search, suggestions, college, hint);
     select.before(controls);
     function searchChanged() {
       const query = search.value.trim().toLocaleLowerCase();
@@ -150,6 +161,16 @@
       const active = suggestions.children[activeIndex];
       search.setAttribute('aria-activedescendant', active.id);
       active.scrollIntoView({ block: 'nearest' });
+    });
+    select.addEventListener('change', () => {
+      if (syncing) return;
+      const selected = select.value;
+      const current = options.find(option => option.value === selected);
+      if (current?.colleges.length === 1) college.value = current.colleges[0];
+      if (selected === '0' && empty.value === '') college.value = '';
+      search.value = '';
+      closeSuggestions();
+      render(selected);
     });
     college.addEventListener('change', () => {
       search.value = '';
