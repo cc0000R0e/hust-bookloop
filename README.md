@@ -211,3 +211,7 @@ src/test/java/                启动、HTTP烟雾、账户、市场、详情及�
 - [数据库设计](./数据库设计.md)
 - [原型使用说明](./prototype/README.md)
 - [Spring Boot官方环境要求](https://docs.spring.io/spring-boot/system-requirements.html)
+
+## 手工验收与问题记录
+
+按 [测试验收记录](测试验收记录.md) 执行 MySQL 和浏览器验收。文档包含账号准备、28项操作用例、预期结果、截图位置及缺陷复测模板；未执行项均标记为待执行。截图放在 `docs/acceptance/screenshots/`。

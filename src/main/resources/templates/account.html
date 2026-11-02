@@ -73,7 +73,8 @@
   </form>
   <form class="account-card" th:action="@{/account/password}" method="post">
     <div class="card-heading"><span class="eyebrow">ACCOUNT SECURITY</span><h2>修改密码</h2><p>更新密码，保护你的账户。</p></div><div class="card-content">
-    <label>原密码<input name="oldPassword" type="password" required autocomplete="current-password"></label>
+    <p id="password-error" class="account-feedback error" th:if="${passwordError}" th:text="${passwordError}" role="alert"></p>
+    <label>原密码<input name="oldPassword" type="password" required autocomplete="current-password" th:autofocus="${passwordError != null}" th:attr="aria-describedby=${passwordError != null ? 'password-error' : null}"></label>
     <label>新密码<input name="password" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
     <label>确认新密码<input name="confirmation" type="password" required minlength="6" maxlength="64" autocomplete="new-password"></label>
     <p class="muted">修改后需要重新登录。</p>

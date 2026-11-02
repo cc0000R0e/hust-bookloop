@@ -110,7 +110,7 @@ public class AccountController {
                     org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
             return "redirect:/login?passwordChanged";
         } catch (IllegalArgumentException exception) {
-            model.addAttribute("error", exception.getMessage());
+            model.addAttribute("passwordError", exception.getMessage());
             return account(principal, model);
         }
     }

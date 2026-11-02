@@ -104,8 +104,15 @@ class AccountFlowTest {
         assertThat(users.findByUsername("profile_test").orElseThrow().getDefaultContactValue()).isEqualTo("12345");
         post(client, "/account/contact", Map.of("_csrf", csrf, "type", "", "value", ""));
         assertThat(users.findByUsername("profile_test").orElseThrow().getDefaultContactValue()).isNull();
-        assertThat(post(client, "/account/password", Map.of("_csrf", csrf, "oldPassword", "wrong",
-            "password", "changed456", "confirmation", "changed456")).body()).contains("原密码错误");
+        var passwordFailure = post(client, "/account/password", Map.of("_csrf", csrf, "oldPassword", "wrong",
+            "password", "changed456", "confirmation", "changed456")).body();
+        assertThat(passwordFailure).contains("原密码错误", "id=\"password-error\"", "aria-describedby=\"password-error\"")
+            .doesNotContain("changed456");
+        int passwordForm = passwordFailure.indexOf("action=\"/account/password\"");
+        assertThat(passwordForm).isGreaterThanOrEqualTo(0);
+        assertThat(passwordFailure.substring(0, passwordForm)).doesNotContain("原密码错误");
+        assertThat(passwordFailure.substring(passwordForm, passwordFailure.indexOf("</form>", passwordForm)))
+            .contains("原密码错误");
         assertThat(encoder.matches("secure123", users.findByUsername("profile_test").orElseThrow().getPasswordHash())).isTrue();
         var changed = post(client, "/account/password", Map.of("_csrf", csrf, "oldPassword", "secure123",
             "password", "changed456", "confirmation", "changed456"));
