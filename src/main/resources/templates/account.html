@@ -6,6 +6,8 @@
   <title>我的账户 · HUST BookLoop</title>
   <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/account.css}">
+  <link rel="stylesheet" th:href="@{/css/major-picker.css}">
+  <script th:src="@{/js/major-picker.js}" defer></script>
 </head>
 <body class="account-page">
 <a class="skip-link" href="#account-main">跳转到账户设置</a>
@@ -44,6 +46,18 @@
     </section>
     <p class="account-feedback" th:if="${success}" th:text="${success}" role="status"></p>
     <p class="account-feedback error" th:if="${error}" th:text="${error}" role="alert"></p>
+    <form class="account-card personal-major" th:action="@{/account/major}" method="post">
+      <div class="card-heading"><h2>我的专业</h2><p>用于预选发布专业和快捷筛选，不会改变已发布资料。</p></div>
+      <div class="card-content">
+        <label>专业（选填）<select name="majorId" data-major-picker>
+          <option value="">未设置</option>
+          <option th:if="${majorDisabled}" th:value="${majorId}" th:text="${currentMajorName} + '（已停用，可保留或更换）'" selected></option>
+          <option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}" th:attr="data-colleges=${major.colleges}" th:selected="${majorId == major.id}"></option>
+        </select></label>
+        <p class="muted">找不到专业时可以选择未设置，由管理员补充。已停用的个人专业保留记录，新发布默认使用不限专业。</p>
+        <button class="primary" type="submit">保存专业</button>
+      </div>
+    </form>
     <div class="account-grid">
   <form class="account-card" th:action="@{/account/contact}" method="post">
     <div class="card-heading"><span class="eyebrow">CONTACT INFORMATION</span><h2>默认联系方式</h2><p>发布资料时自动带入，随时可以调整。</p></div><div class="card-content">

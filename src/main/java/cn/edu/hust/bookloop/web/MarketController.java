@@ -16,7 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Controller
 public class MarketController {
     private final MarketService market;
-    public MarketController(MarketService market) { this.market = market; }
+    private final cn.edu.hust.bookloop.account.UserRepository users;
+    public MarketController(MarketService market, cn.edu.hust.bookloop.account.UserRepository users) { this.market = market; this.users = users; }
 
     @GetMapping({"/", "/market"})
     public String market(@RequestParam(defaultValue = "") String q,
@@ -42,6 +43,12 @@ public class MarketController {
         model.addAttribute("categories", MarketOptions.CATEGORIES);
         model.addAttribute("conditions", MarketOptions.CONDITIONS);
         model.addAttribute("username", principal == null ? null : principal.getName());
+        Long personalMajor = principal == null ? null : users.findByUsername(principal.getName()).map(u -> u.getMajorId()).orElse(null);
+        model.addAttribute("personalMajor", personalMajor);
+        if (personalMajor != null) {
+            var personalFilter = new MarketFilter(q, personalMajor, semester, category, tags, mode, minPrice, maxPrice, condition, sort, 0);
+            model.addAttribute("personalMajorUrl", pageUrl(personalFilter, 0, marketPath));
+        }
         model.addAttribute("marketPath", marketPath);
         model.addAttribute("marketUrl", pageUrl(filter, page, marketPath));
         model.addAttribute("previousUrl", pageUrl(filter, Math.max(0, page - 1), marketPath));

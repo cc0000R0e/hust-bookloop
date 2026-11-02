@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.HEAD, "/books/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/login", "/register", "/market", "/css/**", "/js/**", "/prototype/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                .requestMatchers("/account", "/account/contact", "/account/password").authenticated()
+                .requestMatchers("/account", "/account/contact", "/account/password", "/account/major").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.HEAD, "/", "/market", "/css/**", "/js/**", "/prototype/**").permitAll()
                 .anyRequest().denyAll())

@@ -6,6 +6,8 @@
   <title>教材市场 · HUST BookLoop</title>
   <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/market.css}">
+  <link rel="stylesheet" th:href="@{/css/major-picker.css}">
+  <script th:src="@{/js/major-picker.js}" defer></script>
 </head>
 <body>
   <header>
@@ -31,10 +33,12 @@
   <main class="workspace" id="market">
     <div class="page-heading"><h1>教材市场</h1><span class="subtitle">让读过的书，继续下一段旅程。</span></div>
     <section class="filters" aria-label="筛选资料">
-      <label><span class="sr-only">专业</span><select name="major" form="market-filters">
+      <a class="my-major-shortcut" th:if="${personalMajor != null}" th:href="${personalMajorUrl}">适合我的专业</a>
+      <a class="my-major-shortcut" th:if="${username != null and personalMajor == null}" th:href="@{/account}">设置我的专业</a>
+      <label><span class="sr-only">专业</span><select data-major-picker name="major" form="market-filters">
         <option value="">全部专业</option>
         <option value="0" th:selected="${filter.major != null and filter.major == 0}">不限专业</option>
-        <option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}" th:selected="${filter.major == major.id}"></option>
+        <option th:each="major : ${majors}" th:attr="data-colleges=${major.colleges}" th:value="${major.id}" th:text="${major.name}" th:selected="${filter.major == major.id}"></option>
       </select></label>
       <label><span class="sr-only">学期</span><select name="semester" form="market-filters">
         <option value="">不限学期</option>

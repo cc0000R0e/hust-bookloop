@@ -10,17 +10,42 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountService {
     private final UserRepository users;
     private final PasswordEncoder encoder;
-    public AccountService(UserRepository users, PasswordEncoder encoder) {
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    public AccountService(UserRepository users, PasswordEncoder encoder, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
         this.users = users; this.encoder = encoder;
     }
     public static String normalize(String username) { return username.strip().toLowerCase(Locale.ROOT); }
     @Transactional
     public void register(String username, String password, String confirmation) {
+        register(username, password, confirmation, null);
+    }
+
+    @Transactional
+    public void register(String username, String password, String confirmation, Long majorId) {
         username = normalize(username);
         if (!username.matches("[a-z0-9_]{4,20}")) throw new IllegalArgumentException("账号应为4—20位字母、数字或下划线。");
         validatePassword(password, confirmation);
         if (users.existsByUsername(username)) throw new IllegalArgumentException("此账号已被使用，请更换账号。");
-        users.saveAndFlush(new AppUser(username, encoder.encode(password)));
+        validateMajor(majorId);
+        var user = new AppUser(username, encoder.encode(password));
+        user.setMajorId(majorId);
+        users.saveAndFlush(user);
+    }
+
+    private void validateMajor(Long majorId) {
+        if (majorId == null) return;
+        var enabled = jdbc.queryForList("select enabled from major where id = ? for update", Boolean.class, majorId);
+        if (majorId <= 0 || enabled.isEmpty() || !Boolean.TRUE.equals(enabled.getFirst()))
+            throw new IllegalArgumentException("请选择有效且启用的专业，或选择未设置。");
+    }
+
+    @Transactional
+    public void updateMajor(String username, Long majorId) {
+        var user = users.findByUsername(username).orElseThrow();
+        if (java.util.Objects.equals(user.getMajorId(), majorId)) return;
+        validateMajor(majorId);
+        user.setMajorId(majorId);
     }
 
     private void validatePassword(String password, String confirmation) {

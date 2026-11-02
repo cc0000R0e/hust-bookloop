@@ -8,6 +8,7 @@ CREATE TABLE app_user (
     username VARCHAR(40) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(16) NOT NULL DEFAULT 'USER',
+    major_id BIGINT NULL,
     default_contact_type VARCHAR(16) NULL,
     default_contact_value VARCHAR(100) NULL,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -25,6 +26,7 @@ CREATE TABLE app_user (
 CREATE TABLE major (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(40) NOT NULL,
+    colleges VARCHAR(255) NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
@@ -33,6 +35,8 @@ CREATE TABLE major (
     CONSTRAINT ck_major_name CHECK (CHAR_LENGTH(TRIM(name)) > 0 AND name <> '不限专业'),
     CONSTRAINT ck_major_enabled CHECK (enabled IN (0,1))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE app_user ADD CONSTRAINT fk_user_major FOREIGN KEY (major_id) REFERENCES major(id);
 
 CREATE TABLE tag (
     id BIGINT NOT NULL AUTO_INCREMENT,

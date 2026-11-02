@@ -63,6 +63,9 @@ public class PublishController {
         var user = users.findByUsername(principal.getName()).orElseThrow();
         form.setContactType(user.getDefaultContactType() == null ? "" : user.getDefaultContactType());
         form.setContactValue(user.getDefaultContactValue() == null ? "" : user.getDefaultContactValue());
+        if (user.getMajorId() != null && options.majors().stream().anyMatch(m -> m.id().equals(user.getMajorId()))) {
+            form.getScopes().getFirst().setMajorId(user.getMajorId());
+        }
         model.addAttribute("form", form);
         options(model);
         return "publish";

@@ -29,7 +29,9 @@ public class MarketService {
         this.entityManager = entityManager;
     }
 
-    public record Option(Long id, String name) {}
+    public record Option(Long id, String name, String colleges) {
+        public Option(Long id, String name) { this(id, name, ""); }
+    }
     public record Card(Long id, String title, String author, String course, String category,
                        String condition, BigDecimal price, boolean gift, List<String> scopes, List<String> tags, String coverUrl) {}
     public record Result(Page<Card> page, List<Option> majors, List<Option> tags) {}
@@ -37,7 +39,7 @@ public class MarketService {
     public Result search(MarketFilter filter) {
         // Disabled dictionary entries remain searchable for historical listings.
         var majors = entityManager.createQuery("select m from Major m order by m.name, m.id", Major.class)
-                .getResultList().stream().map(m -> new Option(m.getId(), m.getName())).toList();
+                .getResultList().stream().map(m -> new Option(m.getId(), m.getName(), m.getColleges())).toList();
         var tags = entityManager.createQuery("select t from BookTag t order by t.name, t.id", BookTag.class)
                 .getResultList().stream().map(t -> new Option(t.getId(), t.getName())).toList();
         if (filter.major() != null && filter.major() != 0 && majors.stream().noneMatch(m -> m.id().equals(filter.major()))

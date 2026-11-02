@@ -17,6 +17,10 @@ public class AppUser {
     @Column(name = "created_at", nullable = false) private LocalDateTime createdAt;
     @Column(name = "updated_at", nullable = false) private LocalDateTime updatedAt;
 
+    @Column(name = "major_id") private Long majorId;
+    public Long getMajorId() { return majorId; }
+    public void setMajorId(Long majorId) { this.majorId = majorId; }
+
     protected AppUser() {}
     public AppUser(String username, String passwordHash) {
         this.username = username;

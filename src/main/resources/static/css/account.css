@@ -86,3 +86,5 @@
   .welcome-actions { margin-left: 0; width: 100%; }
   .welcome-actions a { flex: 1; padding: 10px; }
 }
+
+.personal-major { margin-bottom: 24px; }

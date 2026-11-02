@@ -5,6 +5,8 @@
   <title th:text="${mode == 'edit' ? '编辑资料 · HUST BookLoop' : '填写发布资料 · HUST BookLoop'}">填写发布资料 · HUST BookLoop</title>
   <link rel="stylesheet" th:href="@{/prototype/css/style.css}">
   <link rel="stylesheet" th:href="@{/prototype/css/publish.css}">
+  <link rel="stylesheet" th:href="@{/css/major-picker.css}">
+  <script th:src="@{/js/major-picker.js}" defer></script>
 </head>
 <body>
   <header><nav class="nav" aria-label="主导航"><a class="brand" th:href="@{/}">HUST BookLoop</a><div class="navlinks"><a th:href="@{/}">教材市场</a><a th:href="@{/my/listings}">我的发布</a><a th:href="@{/account}">我的账户</a><a class="publish" th:href="@{/books/new}" th:aria-current="${mode == 'edit' ? null : 'page'}">＋ 发布资料</a></div></nav></header>
@@ -49,7 +51,7 @@
           <h2><span>03</span> 适用范围</h2><p class="section-note">专业与学期成对选择。通用资料可选择“不限专业＋未定义”。</p>
           <div id="scope-rows">
             <div class="scope-row" th:each="scope, row : *{scopes}">
-              <label><span class="sr-only">适用专业</span><select data-scope="majorId" th:field="*{scopes[__${row.index}__].majorId}" required><option value="0">不限专业</option><option th:each="major : ${majors}" th:value="${major.id}" th:text="${major.name}"></option></select></label>
+              <label><span class="sr-only">适用专业</span><select data-major-picker data-scope="majorId" th:field="*{scopes[__${row.index}__].majorId}" required><option value="0">不限专业</option><option th:each="major : ${majors}" th:attr="data-colleges=${major.colleges}" th:value="${major.id}" th:text="${major.name}"></option></select></label>
               <label><span class="sr-only">适用学期</span><select data-scope="semester" th:field="*{scopes[__${row.index}__].semester}" required><option th:each="item : ${semesters}" th:value="${item.key}" th:text="${item.value}"></option></select></label>
               <button type="button" data-remove-scope>移除</button>
             </div>

@@ -12,10 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class PublishOptions {
     private final EntityManager entityManager;
     public PublishOptions(EntityManager entityManager) { this.entityManager = entityManager; }
-    public record Option(Long id, String name) {}
+    public record Option(Long id, String name, String colleges) {
+        public Option(Long id, String name) { this(id, name, ""); }
+    }
     public List<Option> majors() {
         return entityManager.createQuery("select m from Major m where m.enabled = true order by m.name, m.id", Major.class)
-                .getResultList().stream().map(m -> new Option(m.getId(), m.getName())).toList();
+                .getResultList().stream().map(m -> new Option(m.getId(), m.getName(), m.getColleges())).toList();
     }
     public List<Option> tags() {
         return entityManager.createQuery("select t from BookTag t where t.enabled = true order by t.name, t.id", BookTag.class)

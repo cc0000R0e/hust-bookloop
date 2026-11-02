@@ -75,9 +75,11 @@
   addScope.addEventListener("click", () => {
     if (rows.children.length >= 50) return;
     const row = rows.firstElementChild.cloneNode(true);
+    window.MajorPicker?.prepareClone(rows.firstElementChild, row);
     row.querySelector('[data-scope="majorId"]').value = "0";
     row.querySelector('[data-scope="semester"]').value = "UNDEFINED";
     rows.append(row);
+    window.MajorPicker?.enhance(row.querySelector("[data-major-picker]"));
     syncScopes();
   });
   rows.addEventListener("click", (event) => {

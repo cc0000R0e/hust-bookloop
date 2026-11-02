@@ -10,6 +10,8 @@ public class Major {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(nullable = false, length = 40) private String name;
     @Column(nullable = false) private boolean enabled;
+    @Column(length = 255) private String colleges;
+    public String getColleges() { return colleges == null ? "" : colleges; }
     protected Major() {}
     public Long getId() { return id; }
     public String getName() { return name; }
